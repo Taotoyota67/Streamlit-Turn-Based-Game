@@ -17,7 +17,7 @@ if "using_heal" not in st.session_state :
     st.session_state["using_heal"] = False
     act = False
 else :
-    if st.session_state["using_heal"] == True :
+    if st.session_state["using_heal"]:
         act = True
     else :
         act = False
