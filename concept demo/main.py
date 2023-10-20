@@ -193,4 +193,4 @@ if act :
         mon_empty.empty()
 
     st.session_state["using_heal"] = False
-    st.rerun()
+    st.rerun() ###
