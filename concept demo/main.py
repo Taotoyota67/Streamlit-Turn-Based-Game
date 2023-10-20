@@ -23,6 +23,7 @@ else :
         act = False
 
 st.sidebar.title(":blue[Journey of Momo]")
+
 # Losing mana or not
 if "l_m" not in st.session_state :
     l_m = 0
