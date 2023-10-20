@@ -192,6 +192,5 @@ if act :
             time.sleep(2)
         mon_empty.empty()
 
-##############################
     st.session_state["using_heal"] = False
     st.rerun()
