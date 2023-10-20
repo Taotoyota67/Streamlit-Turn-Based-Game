@@ -6,7 +6,7 @@ import time
 import random
 
 from slime import Slime
-from good_boy import Good_Boy
+# from good_boy import Good_Boy
 monster = Slime()
 s_col1, s_col2, s_col3 = st.columns(3)
 image = Image.open("bocchi.jpg")
