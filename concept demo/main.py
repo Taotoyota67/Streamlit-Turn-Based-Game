@@ -8,8 +8,7 @@ import random
 from slime import Slime
 # from good_boy import Good_Boy
 monster = Slime()
-s_col1, s_col2, s_col3 = st.columns(3)
-image = Image.open("bocchi.jpg")
+image = Image.open("bocchi.png")
 
 # Disable weird shits using css
 hide_img_fs = '''<style>
