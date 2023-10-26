@@ -28,6 +28,6 @@ chart = alt.Chart(d_hp).mark_bar().encode(
 st.sidebar.altair_chart(chart)
 
 with st.sidebar.expander("expand it") :
-    image = Image.open('bocchi.jpg')
+    image = Image.open('bocchi.png')
     st.write("you entered the fobidden shrine")
     st.image(image)
