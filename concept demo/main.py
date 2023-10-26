@@ -11,6 +11,24 @@ monster = Slime()
 s_col1, s_col2, s_col3 = st.columns(3)
 image = Image.open("bocchi.jpg")
 
+hide_img_fs = '''
+<style>
+button[title="View fullscreen"] {
+    visibility: hidden; /* disable view full screen on image */
+}
+
+.stApp a:first-child {
+    display: none; /* disable title link on markdown */
+}
+
+details {
+    display: none; /* disable save button on graph */
+}
+</style>
+'''
+
+st.markdown(hide_img_fs, unsafe_allow_html=True)
+
 hit_act = False
 skill_act = False
 if "using_heal" not in st.session_state :
