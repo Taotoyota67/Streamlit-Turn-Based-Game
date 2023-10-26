@@ -10,18 +10,12 @@ from slime import Slime
 monster = Slime()
 image = Image.open("bocchi.png")
 
+st.set_page_config(layout="wide")
+
+col1, col2 = st.columns([2, 4])
+
 # Disable weird shits using css
-hide_img_fs = '''<style>
-button[title="View fullscreen"] {
-    visibility: hidden; /* disable view full screen on image */
-}
-.stApp a:first-child {
-    display: none; /* disable title link on markdown */
-}
-details {
-    display: none; /* disable save button on graph */
-}
-</style>'''
+hide_img_fs = "<style>{}</style>".format(open("mylifesad.css").read())
 
 st.markdown(hide_img_fs, unsafe_allow_html=True)
 
@@ -36,7 +30,8 @@ else:
     else:
         act = False
 
-st.sidebar.title(":blue[Journey of Momo]")
+
+col1.title(":blue[Journey of Momo]")
 
 # Losing mana or not
 if "l_m" not in st.session_state:
@@ -63,12 +58,12 @@ my_chart = alt.Chart(d_hp).mark_bar().encode(
     x="Status",
     y=alt.X("amount", scale=alt.Scale(domain=[0, 100]))
 ).properties(width=200)
-st.sidebar.altair_chart(my_chart)
+col1.altair_chart(my_chart)
 
 # If I have already using heal the previous rerun, the button will be disabled
 if not st.session_state["using_heal"]:
     # Hit button
-    if st.sidebar.button("Hit"):
+    if col1.button("Hit"):
         if not skill_act:
             hit = 5
             act = True
@@ -81,7 +76,7 @@ if not st.session_state["using_heal"]:
             st.session_state["using_heal"] = False
 
     # Skill button
-    if st.sidebar.button("Skill"):
+    if col1.button("Skill"):
         if not hit_act:
             heal = 5
             act = True
@@ -100,7 +95,7 @@ if not st.session_state["using_heal"]:
 
 
 # Writing after using skill or hit
-side_empty1 = st.sidebar.empty()
+side_empty1 = col1.empty()
 # Writing text after using skill
 if skill_act:
     with side_empty1:
@@ -151,12 +146,12 @@ mon_chart = alt.Chart(d_mon_hp).mark_bar().encode(
 ).properties(height=105, width=500)
 
 # Monster display
-st.title(":red[Bocchi the slime]")
-st.altair_chart(mon_chart)
-st.image(image, caption="wild Bocchi appeared !!!", width=300)
+col2.title(":red[Bocchi the slime]")
+col2.altair_chart(mon_chart)
+col2.image(image, caption="wild Bocchi appeared !!!", width=300)
 
 # Monster empty
-mon_empty = st.empty()
+mon_empty = col2.empty()
 
 # Writing text after monster being hit
 if act:
