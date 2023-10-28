@@ -29,10 +29,15 @@ class EntityStats:
         self.current_mana = mana
         self.max_mana = mana
         self.heal_amount = heal
+        self.name = None
 
     @property
     def is_alive(self):
         return self.current_hp > 0
+
+    def set_name(self, name: str):
+        self.name = name
+        return self
 
     def add_health(self, amount: int) -> None:
         self.current_hp = min(self.current_hp + amount, self.max_hp)
@@ -86,10 +91,8 @@ class Image:
 
 
 class Slime(EntityStats):
-    def __init__(self, name: str, max_hp: int, damage: int, heal: int = 0, mana: int = 0) -> None:
+    def __init__(self, max_hp: int, damage: int, heal: int = 0, mana: int = 0) -> None:
         super().__init__(max_hp, damage, heal, mana)
-
-        self.name = name
 
         self.text = EntityText()
         self.text.set(
@@ -131,7 +134,7 @@ class Slime(EntityStats):
         self._image["alive"] = "bocchi.png"
         self._image["dead"] = "bocchi_dead.png"
 
-    def set_text(self, text: EntityText):
+    def set_text(self, text: EntityText) -> None:
         self.text = text
 
     @property
