@@ -1,0 +1,6 @@
+altair==5.1.2
+numpy==1.23.5
+pandas==2.0.2
+Pillow==9.5.0 # PIL
+rembg==2.0.52 # Remove bg
+streamlit==1.27.2
