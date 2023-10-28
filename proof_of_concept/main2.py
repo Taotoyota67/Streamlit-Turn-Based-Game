@@ -11,7 +11,7 @@ from functions import animate_text
 sess = PersistanceStorage(st)
 
 # Set up webpage, load CSS
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide") # type: ignore
 
 col1, col2 = st.columns([2, 4])
 

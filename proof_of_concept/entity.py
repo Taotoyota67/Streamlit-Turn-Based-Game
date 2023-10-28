@@ -39,13 +39,13 @@ class EntityStats:
 
     def reduce_health(self, amount: int) -> None:
         self.current_hp = max(self.current_hp - amount, 0)
-    
+
     def heal(self) -> None:
         self.current_hp = min(self.current_hp + self.heal_amount, self.max_hp)
-    
+
     def add_mana(self, amount: int) -> None:
         self.current_mana = min(self.current_mana + amount, self.max_mana)
-    
+
     def reduce_mana(self, amount: int) -> None:
         self.current_mana = max(self.current_mana - amount, 0)
 
@@ -68,17 +68,17 @@ class Image:
     def __init__(self) -> None:
         self._images = {}
         self._bimages = {}
-    
+
     def __getitem__(self, __name: str) -> BytesIO:
         if __name not in self._images:
             raise KeyError(f"Image named {__name}; not found")
-        
+
         if __name in self._bimages:
             return self._bimages[__name]
-        
-        with open(self._images[__name], "rb") as f:
-            self._bimages[__name] = f.read()
-        
+
+        with open(self._images[__name], "rb") as file:
+            self._bimages[__name] = file.read()
+
         return self._bimages[__name]
 
     def __setitem__(self, __name: str, __value: Any) -> None:
@@ -88,9 +88,9 @@ class Image:
 class Slime(EntityStats):
     def __init__(self, name: str, max_hp: int, damage: int, heal: int = 0, mana: int = 0) -> None:
         super().__init__(max_hp, damage, heal, mana)
-        
+
         self.name = name
-        
+
         self.text = EntityText()
         self.text.set(
             "got_hit",
@@ -104,7 +104,7 @@ class Slime(EntityStats):
                 "O U C H ! ! !"
             )
         )
-        
+
         self.text.set(
             "do_hit",
             Text().add(
@@ -115,7 +115,7 @@ class Slime(EntityStats):
                 "T...Take this!"
             )
         )
-        
+
         self.text.set(
             "do_heal",
             Text().add(
@@ -126,20 +126,18 @@ class Slime(EntityStats):
                 "I feel back to normal."
             )
         )
-        
+
         self._image = Image()
         self._image["alive"] = "bocchi.png"
         self._image["dead"] = "bocchi_dead.png"
 
     def set_text(self, text: EntityText):
         self.text = text
-    
+
     @property
     def image(self):
         return self._image["alive"] if self.current_hp > 0 else self._image["dead"]
 
 
 class Player(EntityStats):
-    def __init__(self, max_hp: int, damage: int, heal: int = 0, mana: int = 0) -> None:
-        super().__init__(max_hp, damage, heal, mana)
-        
+    pass
