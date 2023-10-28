@@ -1,8 +1,8 @@
+import random
 from time import sleep
 import streamlit as st
 import pandas as pd
 import altair as alt
-import random
 
 from entity import Slime, Player
 from storage import PersistanceStorage
@@ -11,20 +11,19 @@ from functions import animate_text
 sess = PersistanceStorage(st)
 
 # Set up webpage, load CSS
-st.set_page_config(layout="wide") # type: ignore
+st.set_page_config(layout="wide")  # type: ignore
 
 col1, col2 = st.columns([2, 4])
 
 # Disable weird shits using css
-hide_img_fs = "<style>{}</style>".format(open("mylifesad.css").read())
+hide_img_fs = f"<style>{open('mylifesad.css').read()}</style>"
 
 st.markdown(hide_img_fs, unsafe_allow_html=True)
 
 
-
 # mon_name = sess.gset("mon_name", "Bocchi")
 already_dead = sess.gset("already_dead", False)
-monster = sess.gset("monster", Slime("Bocchi", 50, 10, heal=5))
+monster = sess.gset("monster", Slime(50, 10, heal=5).set_name("Bocchi"))
 player = sess.gset("player", Player(100, 25, 10, 100))
 
 
@@ -35,9 +34,11 @@ col1.title(":blue[Journey of Momo]")
 
 # Player status chart
 chart_empty = col1.empty()
+
+
 def update_player_status_chart():
     status = {
-        'Status': ['HP', "MANA"], 
+        'Status': ['HP', "MANA"],
         'amount': [player.current_hp, player.current_mana]
     }
     d_hp = pd.DataFrame(status)
@@ -47,10 +48,11 @@ def update_player_status_chart():
     ).properties(width=200)
     chart_empty.altair_chart(my_chart)
 
+
 update_player_status_chart()
 
 # Hit button
-if col1.button("Hit"): # TODO: Use call back instead of this shit.
+if col1.button("Hit"):  # TODO: Use call back instead of this shit.
     if not skill_act:
         hit_act = True
         monster.reduce_health(player.damage)
@@ -94,9 +96,11 @@ if hit_act:
     text_empty.empty()
 
 # Monster status chart
+
+
 def update_monster_status_chart():
     mon_hp = {
-        'Status': ['HP'], 
+        'Status': ['HP'],
         'amount': [monster.current_hp]
     }
     d_mon_hp = pd.DataFrame(mon_hp)
@@ -107,11 +111,12 @@ def update_monster_status_chart():
     ).properties(height=105, width=500)
     col2.altair_chart(mon_chart)
 
+
 # Monster display
 col2.title(f":red[{monster.name}]")
 update_monster_status_chart()
 col2.image(
-    monster.image, 
+    monster.image,
     width=300
 )
 
@@ -122,7 +127,8 @@ mon_empty = col2.empty()
 if (hit_act or skill_act) and (monster.is_alive):
     # if player hit
     if hit_act:
-        animate_text(mon_empty, monster.text.get("got_hit"), time_per_sentence=2)
+        animate_text(mon_empty, monster.text.get(
+            "got_hit"), time_per_sentence=2)
         sleep(2)
         mon_empty.empty()
 
@@ -132,16 +138,20 @@ if (hit_act or skill_act) and (monster.is_alive):
         player.reduce_health(monster.damage)
 
         # Writing text after monster using hit
-        animate_text(mon_empty, f"{monster.name} is attacking...", time_per_letter=0.1)
+        animate_text(
+            mon_empty, f"{monster.name} is attacking...", time_per_letter=0.1)
         sleep(2)
-        animate_text(mon_empty, monster.text.get("do_hit"), time_per_letter=0.1)
+        animate_text(mon_empty, monster.text.get(
+            "do_hit"), time_per_letter=0.1)
         sleep(2)
         mon_empty.empty()
     else:
         monster.heal()
-        animate_text(mon_empty, f"{monster.name} is healing...", time_per_letter=0.1)
+        animate_text(
+            mon_empty, f"{monster.name} is healing...", time_per_letter=0.1)
         sleep(2)
-        animate_text(mon_empty, monster.text.get("do_heal"), time_per_sentence=2)
+        animate_text(mon_empty, monster.text.get(
+            "do_heal"), time_per_sentence=2)
         sleep(2)
         mon_empty.empty()
 
