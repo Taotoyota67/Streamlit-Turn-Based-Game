@@ -4,7 +4,7 @@ import time
 
 mon = Slime()
 st.write(mon.hp)
-if st.button("skill") :
+if st.button("skill"):
     mon.heal()
     st.write(mon.hp)
     time.sleep(2)

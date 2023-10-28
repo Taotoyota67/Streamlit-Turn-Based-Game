@@ -10,33 +10,33 @@ from good_boy import Good_Boy
 from player import Player
 
 # random monster
-if "mon_name" not in st.session_state :
+if "mon_name" not in st.session_state:
     mon_name = random.choice(["Bocchi", "Good Boy"])
     st.session_state["mon_name"] = mon_name
-else :
+else:
     mon_name = st.session_state["mon_name"]
 
 # create session state with class object value
-if "monster" not in st.session_state :
-    if mon_name == "Bocchi" :
+if "monster" not in st.session_state:
+    if mon_name == "Bocchi":
         monster = Slime()
         st.session_state["monster"] = monster
-    elif mon_name == "Good Boy" :
+    elif mon_name == "Good Boy":
         monster = Good_Boy()
         st.session_state["monster"] = monster
-if "player" not in st.session_state :
+if "player" not in st.session_state:
     player = Player()
     st.session_state["player"] = player
 # create monster image
-if st.session_state["monster"].hp != 0 :
-    if mon_name == "Bocchi" :
+if st.session_state["monster"].hp != 0:
+    if mon_name == "Bocchi":
         image = Image.open("bocchi.png")
-    if mon_name == "Good Boy" :
+    if mon_name == "Good Boy":
         image = Image.open("good_boy.png")
-else :
-    if mon_name == "Bocchi" :
+else:
+    if mon_name == "Bocchi":
         image = Image.open("bocchi_dead.png")
-    elif mon_name == "Good Boy" :
+    elif mon_name == "Good Boy":
         image = Image.open("good_boy_dead.jpg")
 
 st.set_page_config(layout="wide")
@@ -50,14 +50,15 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 
 hit_act = False
 skill_act = False
-if "already dead" not in st.session_state :
+if "already dead" not in st.session_state:
     st.session_state["already dead"] = False
 
 col1.title(":blue[Journey of Momo]")
 
 # Player status chart
 chart_empty = col1.empty()
-status = {'Status': ['HP', "MANA"], 'amount': [st.session_state["player"].hp, st.session_state["player"].mana]}
+status = {'Status': ['HP', "MANA"], 'amount': [
+    st.session_state["player"].hp, st.session_state["player"].mana]}
 d_hp = pd.DataFrame(status)
 my_chart = alt.Chart(d_hp).mark_bar().encode(
     x="Status",
@@ -79,7 +80,8 @@ if col1.button("Skill"):
         st.session_state["player"].lose_mana()
 
         # update player chart
-        status = {'Status': ['HP', "MANA"], 'amount': [st.session_state["player"].hp, st.session_state["player"].mana]}
+        status = {'Status': ['HP', "MANA"], 'amount': [
+            st.session_state["player"].hp, st.session_state["player"].mana]}
         d_hp = pd.DataFrame(status)
         my_chart = alt.Chart(d_hp).mark_bar().encode(
             x="Status",
@@ -122,7 +124,8 @@ if hit_act:
 mon_hp = {'Status': ['HP'], 'amount': [st.session_state["monster"].hp]}
 d_mon_hp = pd.DataFrame(mon_hp)
 mon_chart = alt.Chart(d_mon_hp).mark_bar().encode(
-    x=alt.X("amount", scale=alt.Scale(domain=[0, st.session_state["monster"].max_hp])),
+    x=alt.X("amount", scale=alt.Scale(
+        domain=[0, st.session_state["monster"].max_hp])),
     y="Status"
 ).properties(height=105, width=500)
 
@@ -139,7 +142,8 @@ if (hit_act or skill_act) and (st.session_state["monster"].hp != 0):
     # if player hit
     if hit_act:
         with mon_empty:
-            mon_got_hit_text = random.choice(st.session_state["monster"].got_hit)
+            mon_got_hit_text = random.choice(
+                st.session_state["monster"].got_hit)
             for i in range(len(mon_got_hit_text)):
                 time.sleep(0.03)
                 st.write(mon_got_hit_text[:i+1])
@@ -184,23 +188,25 @@ if (hit_act or skill_act) and (st.session_state["monster"].hp != 0):
             mon_empty.empty()
 
         # if monster charge
-        elif skill_random == "charge" :
+        elif skill_random == "charge":
             st.session_state["monster"].charge()
-            mon_charge_text = random.choice(st.session_state["monster"].do_charge)
+            mon_charge_text = random.choice(
+                st.session_state["monster"].do_charge)
 
             # Writng text after monster using charge
             with mon_empty:
                 for i in range(len(f"{mon_name} is charging !!!...its attack damage + 10")):
                     time.sleep(0.1)
-                    st.write(f"{mon_name} is charging !!!...its attack damage + 10"[:i+1])
+                    st.write(
+                        f"{mon_name} is charging !!!...its attack damage + 10"[:i+1])
                 time.sleep(2)
                 for i in range(len(mon_charge_text)):
                     time.sleep(0.03)
                     st.write(mon_charge_text[:i+1])
                 time.sleep(2)
             mon_empty.empty()
-    st.rerun() #########
+    st.rerun()
 
-if (st.session_state["monster"].hp == 0) and not(st.session_state["already dead"]) :
+if (st.session_state["monster"].hp == 0) and not (st.session_state["already dead"]):
     st.session_state["already dead"] = True
-    st.rerun() #########
+    st.rerun()
