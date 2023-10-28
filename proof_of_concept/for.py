@@ -1,5 +1,5 @@
-import streamlit as st
 import time
+import streamlit as st
 
 if st.button("Press"):
     for i in range(10):
