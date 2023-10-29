@@ -16,7 +16,8 @@ st.set_page_config(layout="wide")  # type: ignore
 col1, col2 = st.columns([2, 4])
 
 # Disable weird shits using css
-hide_img_fs = f"<style>{open('mylifesad.css').read()}</style>"
+with open('mylifesad.css') as f:
+    hide_img_fs = f"<style>{f.read()}</style>"
 
 st.markdown(hide_img_fs, unsafe_allow_html=True)
 

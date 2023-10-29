@@ -1,8 +1,9 @@
 from types import ModuleType
-from db import Database
-from accounts import Accounts
-
 from time import sleep
+
+from accounts import Accounts
+from db import Database
+
 
 class GameManager:
     def __init__(self, st: ModuleType, db: Database, acc: Accounts) -> None:
@@ -43,7 +44,8 @@ class GameManager:
         self.page.title("Good name!")
         self.st.write(f"Now **{username}**, What is your password?")
         password = self.st.text_input("password", placeholder="Enter a password",
-                                      on_change=self.create_password_page, label_visibility="hidden",
+                                      on_change=self.create_password_page,
+                                      label_visibility="hidden",
                                       type="password", args=(username,))
         self.st.button("Confirm", on_click=self.create_account,
                        disabled=len(password) < 3, args=(username, password))
