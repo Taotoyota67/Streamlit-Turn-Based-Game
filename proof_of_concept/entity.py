@@ -1,6 +1,9 @@
 from io import BytesIO
 import random
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar
+
+
+T = TypeVar("T", bound="EntityStats")
 
 
 class Text:
@@ -32,10 +35,10 @@ class EntityStats:
         self.name = None
 
     @property
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return self.current_hp > 0
 
-    def set_name(self, name: str):
+    def set_name(self: T, name: str) -> T:
         self.name = name
         return self
 
