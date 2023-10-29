@@ -71,7 +71,7 @@ if col1.button("Skill"):
 text_empty = col1.empty()
 # Writing text after using skill
 if skill_act:
-    animate_text(text_empty, "Using skill...", time_per_letter=0.1)
+    animate_text(text_empty, "Using skill...", time_per_sentence=2)
     sleep(2)
     animate_text(
         text_empty,
@@ -84,7 +84,7 @@ if skill_act:
 
 # Writing text after using hit
 if hit_act:
-    animate_text(text_empty, "Dealing Damage...", time_per_letter=0.1)
+    animate_text(text_empty, "Dealing Damage...", time_per_sentence=1)
     sleep(2)
     animate_text(
         text_empty,
