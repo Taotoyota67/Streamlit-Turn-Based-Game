@@ -1,8 +1,9 @@
 from types import ModuleType
 from time import sleep
 
-from accounts import Accounts
+from accounts import Accounts, AccountAlreadyExists
 from db import Database
+from playerdata import PlayerData
 
 
 class GameManager:
@@ -12,6 +13,7 @@ class GameManager:
         self.acc = acc
         self.cols = st.columns([1, 2])
         self.page = st.empty()
+        self.playerdata = None
         self.main_page()
 
     def clear_page(self) -> None:
@@ -53,12 +55,15 @@ class GameManager:
 
     def create_account(self, username: str, password: str):
         self.clear_page()
-        self.acc.add(username, password)
         self.page.title("Creating account...")
+        try:
+            self.acc.add(username, password)
+        except AccountAlreadyExists:
+            return self.create_account_page()
         sleep(2)
         self.login(username, password)
 
-    def login_page(self, success=True):
+    def login_page(self, success: bool=True):
         self.clear_page()
         self.page.title(
             "Welcome back!" if success else "Incorrect username/password :("
@@ -76,10 +81,16 @@ class GameManager:
     def login(self, username: str, password: str):
         self.clear_page()
         self.page.title("Logging in...")
+
         success = self.acc.login(username, password)
         sleep(2)
         if not success:
             self.login_page(success)
             return
+
+        self.playerdata = PlayerData(username, self.db)
+        self.game_page()
+
+    def game_page(self):
         self.clear_page()
         self.st.write("Yes")
