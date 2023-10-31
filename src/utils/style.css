@@ -22,6 +22,22 @@ div[data-testid="column"] {
     text-align: center;
 }
 
+/* first column */
+div[data-testid="column"]:nth-child(1) {
+    background: rgb(215, 255, 225);
+    height: 80vh; /* 80% of the screen */
+    border-radius: 16px;
+    border: 1px solid #ccc;
+}
+
+/* second column */
+div[data-testid="column"]:nth-child(2) {
+    background: rgb(215, 255, 225);
+    height: 80vh; /* 80% of the screen */
+    border-radius: 16px;
+    border: 1px solid #ccc;
+}
+
 /* image goes centerrrr */
 div[data-testid=stImage] {
     text-align: center;
@@ -29,4 +45,8 @@ div[data-testid=stImage] {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+}
+
+section.main > div:has(~ footer ) {
+    padding-bottom: 0px; /* remove empty space at bottom */
 }
