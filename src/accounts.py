@@ -36,12 +36,8 @@ class Accounts:
     def add(self, username: str, password: str) -> None:
         if self.has(username):  # Just making sure.
             raise AccountAlreadyExists
-        password = hash_sha256(password)
-        self.db["accounts"][username.lower()] = password
+        self.db["accounts"][username.lower()] = hash_sha256(password)
         self.db.save()
 
     def login(self, username: str, password: str) -> bool:
-        if not self.has(username):
-            return False
-        password = hash_sha256(password)
-        return self.db["accounts"][username.lower()] == password
+        return self.db["accounts"][username.lower()] == hash_sha256(password) and self.has(username)
