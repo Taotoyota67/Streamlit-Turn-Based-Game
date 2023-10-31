@@ -42,6 +42,6 @@ class Accounts:
 
     def login(self, username: str, password: str) -> bool:
         if not self.has(username):
-            raise AccountNotExists
+            return False
         password = hash_sha256(password)
         return self.db["accounts"][username.lower()] == password
