@@ -98,9 +98,12 @@ class GameManager:
     def login(self, username: str, password: str):
         self.clear_page()
         self.page.title("Logging in...")
+        try:
+            success = self.acc.login(username, password)
+        except KeyError:  # No account
+            self.login_page(False)
+            return
 
-        success = self.acc.login(username, password)
-        # sleep(2)
         if not success:
             self.login_page(success)
             return
