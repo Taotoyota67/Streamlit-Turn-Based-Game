@@ -1,4 +1,4 @@
-from classes.playerdata import PlayerData
+from playerdata import PlayerData
 
 
 class Player:
