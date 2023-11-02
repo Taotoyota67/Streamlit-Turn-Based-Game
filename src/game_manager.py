@@ -1,19 +1,21 @@
 from types import ModuleType
 from time import sleep
+from typing import Optional
 
 from accounts import Accounts, AccountAlreadyExists
-from db import Database
-from playerdata import PlayerData
+from db import db
+from game import Game
 
 
 class GameManager:
-    def __init__(self, st: ModuleType, db: Database, acc: Accounts) -> None:
+    def __init__(self, st: ModuleType, acc: Accounts) -> None:
         self.st = st
-        self.db = db
         self.acc = acc
         self.col1, self.col2 = None, None
         self.page = st.empty()
+
         self.playerdata = None
+        self.game: Optional[Game] = None
         self.main_page()
         # self.stats_page()
 
@@ -31,12 +33,15 @@ class GameManager:
         self.st.button("Yes", on_click=self.create_account_page)
         self.st.button("No", on_click=self.login_page)
 
-    def create_account_page(self):
+    def create_account_page(self, text: str = ""):
         self.clear_page()
         self.page.title("Let's create an account then...")
         self.st.write("What is your username?")
-        self.st.write(
-            "*The Confirm button will be disable if your username sucks.*")
+        if not text:
+            self.st.write(
+                "*The Confirm button will be disable if your username sucks.*")
+        else:
+            self.st.write(text)
 
         # Text input
         text = self.st.text_input(
@@ -71,7 +76,7 @@ class GameManager:
         try:
             self.acc.add(username, password)
         except AccountAlreadyExists:
-            self.create_account_page()
+            self.create_account_page("Account already exists!")
             return
         sleep(2)
         self.login(username, password)
@@ -108,7 +113,7 @@ class GameManager:
             self.login_page(success)
             return
 
-        self.playerdata = PlayerData(username, self.db)
+        self.game = Game(username)
         self.stats_page()
 
     def stats_page(self):
@@ -124,3 +129,11 @@ class GameManager:
         self.col1.button("Test", on_click=self.stats_page)
 
         self.col2.title("Monster and Menu details goes here.")
+
+    def upgrade_page(self):
+        ...
+
+
+"""
+
+"""

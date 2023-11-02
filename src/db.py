@@ -1,11 +1,29 @@
 import json
-from typing import Any
+from typing import Any, TypeVar, Type
+
+
+T = TypeVar("T", bound="Database")
 
 
 class Database:
+    _instance = None
     # why tf do I use json?
+
     def __init__(self):
-        with open("data/save.json") as f:
+        raise RuntimeError("Call database using Database.get() only!")
+
+    @classmethod
+    def get(cls: Type[T]) -> T:
+        if cls._instance is None:
+            obj = cls.__new__(cls)
+            print('create new')
+            obj.init()
+            cls._instance = obj
+        print('ret')
+        return cls._instance
+
+    def init(self):
+        with open("data/save.json", "r") as f:
             self._data = json.load(f)
 
     def save(self):
@@ -24,3 +42,6 @@ class Database:
 
     def __delitem__(self, key: str) -> None:
         del self._data[key]
+
+
+db = Database.get()
