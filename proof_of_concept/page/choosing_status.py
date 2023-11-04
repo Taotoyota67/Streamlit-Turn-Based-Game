@@ -6,6 +6,7 @@ import altair as alt
 import sys
 sys.path.append('..')
 from storage import PersistanceStorage
+from entity import Player
 
 sess = PersistanceStorage(st)
 sess.gset("choose", "unknown")
@@ -52,7 +53,10 @@ if sess["confirm"]:
     col1.subheader(":blue[Choosed Status]")
     if sess["choose"] == "1st":
         write_status(100, 100, 10, 10)
+        player = sess.gset("player", Player(100, 10, 10, 100))
     elif sess["choose"] == "2nd":
         write_status(150, 50, 20, 5)
+        player = sess.gset("player", Player(150, 20, 5, 50))
     elif sess["choose"] == "3rd":
         write_status(50, 150, 20, 20)
+        player = sess.gset("player", Player(50, 20, 20, 150))
