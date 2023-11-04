@@ -29,6 +29,7 @@ def write_status(hp, mana, atk, heal):
     ).properties(width=200)
     col2.altair_chart(my_chart)
 
+# Status Choice
 if col1.button("1st status",disabled=sess["confirm"], use_container_width=True):
     write_status(100, 100, 10, 10)
     sess["choose"] = "1st"
@@ -46,6 +47,7 @@ if col1.button("CONFIRM", disabled=not sess["anable_confirm"]):
     sess["confirm"] = True
     st.rerun()
 
+# Showing status after confirm
 if sess["confirm"]:
     col1.subheader(":blue[Choosed Status]")
     if sess["choose"] == "1st":
