@@ -25,7 +25,7 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 # mon_name = sess.gset("mon_name", "Bocchi")
 already_dead = sess.gset("already_dead", False)
 monster = sess.gset("monster", Slime(50, 10, heal=5).set_name("Bocchi"))
-player = sess.gset("player", Player(100, 25, 10, 100))
+player = sess.gset("player", Player(100, 10, 10, 100))
 
 
 hit_act = False
