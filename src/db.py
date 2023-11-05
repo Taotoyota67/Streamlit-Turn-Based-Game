@@ -12,9 +12,7 @@ class Database:
     @classmethod
     def get(cls: Type[T]) -> "Database":
         if cls._instance is None:
-            print('create new')
             cls._instance = super().__new__(cls)
-        print('ret')
         return cls._instance
 
     def load(self):
