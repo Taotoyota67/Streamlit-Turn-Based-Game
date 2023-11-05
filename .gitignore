@@ -6,6 +6,9 @@ __pycache__/
 # vscode settings
 .vscode/
 
+# game data file
+data/
+
 # C extensions
 *.so
 
