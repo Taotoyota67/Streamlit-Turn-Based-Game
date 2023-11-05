@@ -7,7 +7,7 @@ __pycache__/
 .vscode/
 
 # game data file
-data/
+src/data/
 
 # C extensions
 *.so
