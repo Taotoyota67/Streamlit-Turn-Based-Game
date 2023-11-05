@@ -77,7 +77,7 @@ class GameManager:
         except AccountAlreadyExists:
             self.create_account_page("Account already exists!")
             return
-        sleep(2)
+        sleep(2.0)
         self.login(username, password)
 
     def login_page(self, success: bool = True):
@@ -118,6 +118,9 @@ class GameManager:
     def stats_page(self):
         self.page.empty()
 
+        if self.game is None:
+            raise NameError("Game is not yet define.")
+
         # Work around of an error 'setIn' cannot be called on an ElementNode
         # Which happen when I make columns and empty object at the same time.
         self.col1, self.col2 = self.st.columns([1, 3])
@@ -127,7 +130,12 @@ class GameManager:
         self.col1.button("Upgrade", on_click=self.stats_page)
         self.col1.button("Test", on_click=self.stats_page)
 
-        self.col2.title("Monster and Menu details goes here.")
+        self.col2.title("Stats")
+        stats = self.game.player.stats
+        self.col2.write(f"Attack Damage: {stats.damage}")
+        self.col2.write(f"Defense: {stats.defense}")
+        self.col2.write(f"Health: {stats.health}")
+        self.col2.write(f"Mana: {stats.mana}")
 
     def upgrade_page(self):
         ...
