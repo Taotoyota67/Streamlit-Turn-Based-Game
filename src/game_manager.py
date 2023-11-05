@@ -3,7 +3,6 @@ from time import sleep
 from typing import Optional
 
 from accounts import Accounts, AccountAlreadyExists
-from db import db
 from game import Game
 
 
@@ -133,7 +132,9 @@ class GameManager:
     def upgrade_page(self):
         ...
 
-
-"""
-
-"""
+# game = Game(username)
+# game.username
+# game.player.stats.attack_level
+# game.player.stats.attack_damage
+# game.player.attack(game.monsters.slime)
+# game.combat.spawn(game.entity.Slime())
