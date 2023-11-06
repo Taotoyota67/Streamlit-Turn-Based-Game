@@ -1,5 +1,5 @@
 from .playerdata import PlayerData  # pylint: disable=E0402
-from .entity import CombatStats  # pylint: disable=E0402
+from .entity import Entity  # pylint: disable=E0402
 
 from typing import Optional
 
@@ -60,7 +60,7 @@ class Player:
         self._username = username
         self._pdata = PlayerData(username)
         self._stats = PlayerStats()
-        self._combat: Optional[CombatStats] = None
+        self._combat: Optional[Entity] = None
 
     @property
     def username(self) -> str:
@@ -71,7 +71,7 @@ class Player:
         return self._stats
 
     @property
-    def combat(self) -> Optional[CombatStats]:
+    def combat(self) -> Optional[Entity]:
         return self._combat
 
     @property
@@ -84,7 +84,7 @@ class Player:
         if self._combat is not None:
             raise PlayerAlreadyInCombat("Player is already in combat!")
 
-        self._combat = CombatStats(
+        self._combat = Entity(
             damage=self._stats.damage,
             health=self._stats.health,
             defense=self._stats.defense,

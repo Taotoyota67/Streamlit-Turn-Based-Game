@@ -1,6 +1,6 @@
 
 
-class CombatStats:
+class Entity:
     def __init__(self, **kwargs) -> None:
         """Initialize when enter a combat.
 
@@ -22,8 +22,10 @@ class CombatStats:
         self.mana = mana
         self.max_mana = mana
 
-        # [[duration (turns), amount of damage], ...]
-        self._damage_overtimes = []
+        # [[duration (turns), value], ...]
+        # value > 0; heal
+        # value < 0; damage
+        self._effects = []
 
     @property
     def is_alive(self) -> bool:
@@ -40,21 +42,33 @@ class CombatStats:
         # Increase mana by 5% of max mana every turns.
         self.increase_mana(self.max_mana * 0.05)
 
-        for index, value in enumerate(self._damage_overtimes):
-            # Take damage
-            self.reduce_health(value[1])
+        for index, value in enumerate(self._effects):
+            # Take effect
+            if value[1] > 0:
+                self.increase_health(value[1])
+            else:
+                self.reduce_health(value[1])
 
             # Reduce poison turns
-            self._damage_overtimes[index][0] -= 1
+            self._effects[index][0] -= 1
 
         # Clear out poison if duration ran out
-        self.clear_ran_out_effect()
+        self._clear_ran_out_effects()
 
-    def clear_ran_out_effect(self) -> None:
-        """Filter out ran out effect
+    def add_effect(self, duration: int, value: float) -> None:
+        """_summary_
         """
-        self._damage_overtimes = [
-            i for i in self._damage_overtimes if i[0] > 0]
+
+    def clear_effects(self) -> None:
+        """Clear all effects.
+        """
+        self._effects = []
+
+    def _clear_ran_out_effects(self) -> None:
+        """Clear ran out effects.
+        """
+        self._effects = [
+            i for i in self._effects if i[0] > 0]
 
     def set_health(self, health: float) -> None:
         """Set entity current health. (Cannot exceed max health)
