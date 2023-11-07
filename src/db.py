@@ -34,7 +34,7 @@ class Database:
     def __setitem__(self, __name: str, __value: Any) -> None:
         self.check_load()
         self._data[__name] = __value
-        self.save()
+        # self.save()
 
     def __contains__(self, item: str) -> bool:
         self.check_load()
