@@ -36,6 +36,14 @@ class PlayerStats:
     def mana(self) -> float:
         return self._mana
 
+    def serialize(self) -> dict:
+        return {
+            "damage": self._damage,
+            "defense": self._defense,
+            "health": self._health,
+            "mana": self._mana
+        }
+
     def reset_stats(self):
         self._damage = 10
         self._defense = 0
@@ -43,7 +51,7 @@ class PlayerStats:
         self._mana = 100
 
     def set_damage(self, damage: float) -> None:
-        self._damage = damage  # pylint: disable=W0201
+        self._damage = damage  # pylint: disable=W0201 # (define variable outside __init__)
 
     def set_defense(self, defense: float) -> None:
         self._defense = defense  # pylint: disable=W0201
@@ -79,6 +87,18 @@ class Player:
         if self._combat is None:
             raise PlayerNotInCombat("Player is not in combat!")
         return self._combat.is_alive
+
+    def save(self) -> None:
+        """Save player.
+        """
+        self._pdata["playerStats"] = self._stats.serialize()
+
+        if self._combat:
+            self._pdata["playerCombat"] = self._combat.serialize()
+        else:
+            self._pdata["playerCombat"] = None
+
+        self._pdata.save()
 
     def start_combat(self) -> None:
         if self._combat is not None:

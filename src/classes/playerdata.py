@@ -15,6 +15,11 @@ class PlayerData:
             db["users"][self.username] = {}
             db.save()
 
+    def save(self) -> None:
+        """Save data to database.
+        """
+        db.save()
+
     def delete(self):
         """Delete all player data.
         """
@@ -26,4 +31,3 @@ class PlayerData:
 
     def __setitem__(self, __name: str, __value: Any) -> None:
         db["users"][self.username][__name] = __value
-        db.save()

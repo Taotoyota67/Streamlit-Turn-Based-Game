@@ -9,3 +9,8 @@ class Game:
     def __init__(self, username: str) -> None:
         self.username = username.lower()
         self.player = Player(self.username)
+
+    def save(self) -> None:
+        """Save game.
+        """
+        self.player.save()

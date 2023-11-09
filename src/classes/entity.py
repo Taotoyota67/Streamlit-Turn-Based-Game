@@ -36,6 +36,16 @@ class Entity:
         """
         return self.health > 0
 
+    def serialize(self) -> dict:
+        return {
+            "damage": self.damage,
+            "health": self.health,
+            "maxHealth": self.max_health,
+            "mana": self.mana,
+            "maxMana": self.max_mana,
+            "effects": self._effects
+        }
+
     def tick(self) -> None:
         """Applied one tick of combat state. (Poison, Mana regen, etc.)
         """
@@ -56,8 +66,13 @@ class Entity:
         self._clear_ran_out_effects()
 
     def add_effect(self, duration: int, value: float) -> None:
-        """_summary_
+        """Add effect to an entity
+
+        Args:
+            duration (int): How long is the effect? (turns)
+            value (float): Positive to heal, negative to damage.
         """
+        self._effects.append([duration, value])
 
     def clear_effects(self) -> None:
         """Clear all effects.
@@ -180,5 +195,6 @@ class Entity:
         Args:
             damage (float): amount of damage.
         """
+        # Placeholder until design finish.
         damage *= 1 - (self.defense / (self.defense + 9))
         self.reduce_health(damage)
