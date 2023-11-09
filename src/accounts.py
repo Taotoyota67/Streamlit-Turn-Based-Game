@@ -15,8 +15,8 @@ class Accounts:
         self.init_db()
 
     def init_db(self):
-        if not db["accounts"]:  # pylint: disable=E1136
-            db["accounts"] = {}  # pylint: disable=E1137
+        if not db["accounts"]:
+            db["accounts"] = {}
 
     def check_username(self, username: str) -> bool:
         """Check if username is valid or not with 5 rules
@@ -48,7 +48,7 @@ class Accounts:
         Returns:
             bool: username exists.
         """
-        return username.lower() in db["accounts"]  # pylint: disable=E1136
+        return username.lower() in db["accounts"]
 
     def add(self, username: str, password: str) -> None:
         """Add account to accounts system.
@@ -62,7 +62,6 @@ class Accounts:
         """
         if self.has(username):  # Just making sure.
             raise AccountAlreadyExists
-        # pylint: disable=E1136
         db["accounts"][username.lower()] = hash_sha256(password)
         db.save()
 
@@ -77,5 +76,4 @@ class Accounts:
         Returns:
             bool: login success.
         """
-        # pylint: disable=E1136
         return db["accounts"][username.lower()] == hash_sha256(password) and self.has(username)
