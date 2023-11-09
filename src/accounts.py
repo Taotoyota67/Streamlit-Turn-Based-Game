@@ -35,7 +35,7 @@ class Accounts:
             username.isspace() or
             not username.isalnum() or
             not username.isascii() or
-            not username.isnumeric() or
+            username.isnumeric() or
             len(username) < 4 or
             self.has(username)
         )
