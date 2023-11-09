@@ -10,7 +10,7 @@ def main():
 
     if "gameManager" not in st.session_state:
         acc = Accounts()
-        st.session_state["gameManager"] = GameManager(st, acc)
+        st.session_state["gameManager"] = GameManager(acc)
 
 
 if __name__ == "__main__":
