@@ -1,3 +1,9 @@
+from typing import TypeVar, Optional
+
+from .image import Image  # pylint: disable=E0402
+from .text import EntityText  # pylint: disable=E0402
+
+T = TypeVar("T", bound="Entity")
 
 
 class Entity:
@@ -12,7 +18,7 @@ class Entity:
         """
         self.damage = kwargs.get("damage", 0)
 
-        hp = kwargs.get("hp", 0)
+        hp = kwargs.get("health", 0)
         self.health = hp
         self.max_health = hp
 
@@ -27,6 +33,10 @@ class Entity:
         # value < 0; damage
         self._effects = []
 
+        self._name = None
+        self._image = Image()
+        self.text = EntityText()
+
     @property
     def is_alive(self) -> bool:
         """Is entity alive?
@@ -35,6 +45,18 @@ class Entity:
             bool: alive.
         """
         return self.health > 0
+
+    @property
+    def image(self) -> bytes:
+        return self._image["alive"] if self.is_alive else self._image["dead"]
+
+    @property
+    def name(self) -> Optional[str]:
+        return self._name
+
+    def set_name(self: T, name: str) -> T:
+        self._name = name
+        return self
 
     def serialize(self) -> dict:
         return {
