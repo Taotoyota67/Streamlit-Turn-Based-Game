@@ -1,5 +1,10 @@
+import hashlib
+
 from db import db
-from utils.functions import hash_sha256
+
+
+def hash_sha256(text: str) -> str:
+    return hashlib.sha256(bytes(text, 'utf-8')).hexdigest()
 
 
 class AccountAlreadyExists(Exception):
