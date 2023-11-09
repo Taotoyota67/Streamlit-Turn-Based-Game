@@ -1,10 +1,15 @@
 import hashlib
+import uuid
 
 from db import db
 
 
-def hash_sha256(text: str) -> str:
-    return hashlib.sha256(bytes(text, 'utf-8')).hexdigest()
+def hash_sha256(text: str, salt: str) -> str:
+    return hashlib.sha512(bytes(text + salt, 'utf-8')).hexdigest()
+
+
+def generate_salt() -> str:
+    return uuid.uuid4().hex
 
 
 class AccountAlreadyExists(Exception):
@@ -68,7 +73,10 @@ class Accounts:
         """
         if self.has(username):  # Just making sure.
             raise AccountAlreadyExists
-        db["accounts"][username.lower()] = hash_sha256(password)
+
+        salt = generate_salt()
+
+        db["accounts"][username.lower()] = [hash_sha256(password, salt), salt]
         db.save()
 
     def login(self, username: str, password: str) -> bool:
@@ -82,4 +90,9 @@ class Accounts:
         Returns:
             bool: login success.
         """
-        return db["accounts"][username.lower()] == hash_sha256(password) and self.has(username)
+        if not self.has(username):
+            return False
+
+        password_hash, salt = db["accounts"][username.lower()]
+
+        return password_hash == hash_sha256(password, salt)
