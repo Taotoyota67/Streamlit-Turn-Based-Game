@@ -1,6 +1,7 @@
-import streamlit as st
 from time import sleep
 from typing import Optional
+
+import streamlit as st
 
 from accounts import Accounts, AccountAlreadyExists
 from game import Game
