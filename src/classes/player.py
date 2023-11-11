@@ -1,5 +1,5 @@
-from .playerdata import PlayerData  # pylint: disable=E0402
-from .entity import Entity  # pylint: disable=E0402
+from classes.playerdata import PlayerData
+from classes.entity import Entity
 
 
 class PlayerException(Exception):
@@ -66,7 +66,7 @@ class Player:
         self._username = username
         self._pdata = PlayerData(username)
         self._stats = PlayerStats()
-        self._entity = Entity(
+        self.entity = Entity(
             damage=self._stats.damage,
             health=self._stats.health,
             defense=self._stats.defense,
@@ -81,18 +81,10 @@ class Player:
     def stats(self) -> PlayerStats:
         return self._stats
 
-    @property
-    def entity(self) -> Entity:
-        return self._entity
-
     def save(self) -> None:
         """Save player.
         """
         self._pdata["playerStats"] = self._stats.serialize()
-
-        if self._entity:
-            self._pdata["playerCombat"] = self._entity.serialize()
-        else:
-            self._pdata["playerCombat"] = None
+        self._pdata["playerCombat"] = self.entity.serialize()
 
         self._pdata.save()
