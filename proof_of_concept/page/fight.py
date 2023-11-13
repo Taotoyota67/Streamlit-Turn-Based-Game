@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-from entity2 import Slime, Player, Good_boy
+from entity import Slime, Player, Goodboy
 from storage import PersistanceStorage
 from functions import animate_text
 
@@ -29,7 +29,7 @@ def fight():
     # list of monster
     monster_dict = {
         "Bocchi" : Slime(50, 10, heal=5).set_name("Bocchi"),
-        "Good boy" : Good_boy(100, 20, heal=10).set_name("Good boy")}
+        "Good boy" : Goodboy(100, 20, heal=10).set_name("Good boy")}
     # Assign the not-fought monster to the session_state
     sess.gset("not_fought_mon", monster_dict)
     # Random monster that is still not being fought
