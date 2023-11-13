@@ -125,16 +125,16 @@ class GameManager:
         self.col1, self.col2 = st.columns([1, 3])
 
         self.col1.title("Menu")
-        self.col1.button("Stats", on_click=self.stats_page)
-        self.col1.button("Upgrade", on_click=self.stats_page)
-        self.col1.button("Test", on_click=self.stats_page)
+        # self.col1.button("Stats", on_click=self.stats_page)
+        # self.col1.button("Upgrade", on_click=self.stats_page)
+        # self.col1.button("Test", on_click=self.stats_page)
 
         self.col2.title("Stats")
-        stats = self.game.player.stats
-        self.col2.write(f"Attack Damage: {stats.damage}")
-        self.col2.write(f"Defense: {stats.defense}")
-        self.col2.write(f"Health: {stats.health}")
-        self.col2.write(f"Mana: {stats.mana}")
+        # stats = self.game.player.stats
+        # self.col2.write(f"Attack Damage: {stats.damage}")
+        # self.col2.write(f"Defense: {stats.defense}")
+        # self.col2.write(f"Health: {stats.health}")
+        # self.col2.write(f"Mana: {stats.mana}")
 
     def upgrade_page(self):
         ...

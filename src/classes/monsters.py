@@ -54,7 +54,7 @@ class Monster(Entity):
         Returns:
             int: _description_
         """
-        return int(config.MONSTER_HEAL_MULTIPLIER * self.max_health)
+        return int(config.MONSTER_HEAL_MULTIPLIER * self.stats.get("max_health"))
 
     def make_move(self, move: str, player: Player) -> int:
         """"Make monster do a move. Please use `random_move` method and pass it to here.
@@ -78,16 +78,16 @@ class Monster(Entity):
             return self.attack(player.entity)
         if move == "heal":
             heal = self.get_heal_amount()
-            self.increase_health(heal)
+            self.stats.health.increase(heal, self.stats.get("max_health"))
             return heal
         if move == "damage_buff":
             damage = self.get_damage() * config.MONSTER_DAMAGE_MULTIPLIER
             self.attack(player.entity, damage=damage)
             return damage
         if move == "mana_drain":
-            mana_amount = int(player.entity.max_mana *
+            mana_amount = int(player.stats.get("max_mana") *
                               config.MONSTER_MANA_DRAIN_MULTIPLIER)
-            player.entity.reduce_mana(mana_amount)
+            player.stats.mana.reduce(mana_amount)
             return mana_amount
         if move == "stun":
             player.entity.stun()
@@ -107,5 +107,5 @@ class Monsters:
                 **setting
             )
 
-    def get(self, monster: str, **kwargs) -> Monster:
+    def get(self, monster: str) -> Monster:
         return self._monsters[monster]
