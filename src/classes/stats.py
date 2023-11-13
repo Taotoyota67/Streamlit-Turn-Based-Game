@@ -27,38 +27,18 @@ class Stat:
 class Stats:
     def __init__(self, **kwargs) -> None:
         health = kwargs.get("health", 0)
-        self._health = Stat(health)
-        self._max_health = Stat(health)
+        self.health = Stat(health)
+        self.max_health = Stat(health)
 
-        self._damage = Stat(kwargs.get("damage", 0))
+        self.damage = Stat(kwargs.get("damage", 0))
 
         mana = kwargs.get("mana", 0)
-        self._mana = Stat(mana)
-        self._max_mana = Stat(mana)
+        self.mana = Stat(mana)
+        self.max_mana = Stat(mana)
 
     def get(self, stat_name: str) -> int:
-        stat: Stat = getattr(self, "_" + stat_name)
+        stat: Stat = getattr(self, stat_name)
         return stat.get()
-
-    @property
-    def health(self) -> Stat:
-        return self._health
-
-    @property
-    def max_health(self) -> Stat:
-        return self._max_health
-
-    @property
-    def damage(self) -> Stat:
-        return self._damage
-
-    @property
-    def mana(self) -> Stat:
-        return self._mana
-
-    @property
-    def max_mana(self) -> Stat:
-        return self._max_mana
 
     def serialize(self) -> dict:
         return {
