@@ -154,7 +154,7 @@ class Entity:
         return damage
 
     def make_move(self, move: MoveType, target: "Entity") -> int:
-        if self.is_stun or not self.is_alive():
+        if self.is_stun() or not self.is_alive():
             raise CannotMakeMove
 
         ret = 0

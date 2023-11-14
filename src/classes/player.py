@@ -2,6 +2,7 @@
 import config
 from classes.entity import Entity
 from classes.enums import MoveType
+from classes.errors import CannotMakeMove
 from classes.playerdata import PlayerData
 from classes.skills import PlayerSkill
 from classes.stats import Stats
@@ -54,6 +55,9 @@ class Player:
         Returns:
             int: amount of damage or amount of heal, could be 1 for poison and etc.
         """
+        if not self.skills.can_use(move):
+            raise CannotMakeMove
+
         return self.entity.make_move(move, target)
 
     def save(self) -> None:
