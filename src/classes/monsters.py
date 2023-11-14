@@ -3,13 +3,9 @@ from typing import Dict
 
 import config
 from classes.entity import Entity
-from classes.player import Player
-from classes.text import Text
+from classes.enums import MoveType
 from classes.image import Image
-
-
-class MonsterInvalidMove(Exception):
-    """Invalid move for monster"""
+from classes.text import Text
 
 
 class Monster(Entity):
@@ -37,14 +33,14 @@ class Monster(Entity):
             Text(value)
         )
 
-    def random_move(self) -> str:
+    def random_move(self) -> MoveType:
         """Random move from monster, edit at config.py
 
         Returns:
-            str: move
+            MoveType: move
         """
         weights = list(self.moves.values())
-        moves = list(self.moves.keys())
+        moves = [MoveType[i.upper()] for i in self.moves.keys()]
 
         return random.choices(moves, weights=weights)[0]
 
@@ -56,49 +52,10 @@ class Monster(Entity):
         """
         return int(config.MONSTER_HEAL_MULTIPLIER * self.stats.get("max_health"))
 
-    def make_move(self, move: str, player: Player) -> int:
-        """"Make monster do a move. Please use `random_move` method and pass it to here.
-
-        Args:
-            move (str): move from `random_move`
-            player (Player): game.player
-
-        Raises:
-            MonsterInvalidMove: make an invalid move.
-
-        Returns:
-            int: attack -> amount of damage
-                 heal -> amount of heal
-                 damage_buff -> amount of damage
-                 mana_drain -> amount of mana
-                 stun -> 1 (yes, just 1)
-
-        """
-        if move == "attack":
-            return self.attack(player.entity)
-        if move == "heal":
-            heal = self.get_heal_amount()
-            self.stats.health.increase(heal, self.stats.get("max_health"))
-            return heal
-        if move == "damage_buff":
-            damage = self.get_damage() * config.MONSTER_DAMAGE_MULTIPLIER
-            self.attack(player.entity, damage=damage)
-            return damage
-        if move == "mana_drain":
-            mana_amount = int(player.stats.get("max_mana") *
-                              config.MONSTER_MANA_DRAIN_MULTIPLIER)
-            player.stats.mana.reduce(mana_amount)
-            return mana_amount
-        if move == "stun":
-            player.entity.stun()
-            return 1
-
-        raise MonsterInvalidMove
-
 
 class Monsters:
     def __init__(self) -> None:
-        self._monsters = {}
+        self._monsters: Dict[str, Monster] = {}
         self.load_monster()
 
     def load_monster(self) -> None:

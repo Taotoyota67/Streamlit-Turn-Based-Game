@@ -62,7 +62,17 @@ MONSTERS = {
 PLAYER_DEFAULT_STATS = {
     "damage": 10,
     "health": 100,
-    "mana": 100
+    "mana": 100,
+}
+
+# Mana cost for every moves.
+PLAYER_MOVE_COSTS = {
+    "attack": 0,
+    "damage_buff": 6,
+    "heal": 8,
+    "poison": 5,
+    "life_steal": 6,
+    "stun": 6,
 }
 
 MONSTER_HEAL_MULTIPLIER = 0.2  # 20% of max_hp
@@ -71,5 +81,6 @@ MONSTER_MANA_DRAIN_MULTIPLIER = 0.25  # 25% of player max_mana
 
 PLAYER_BUFF_MULTIPLIER = 2  # 2x damage
 PLAYER_BUFF_DURATION = 2  # 2 turns
-PLAYER_POISON_MULTIPLIER = 2
+PLAYER_HEAL_MULTIPLIER = 0.5  # 50% of max hp
+PLAYER_POISON_MULTIPLIER = 0.1
 PLAYER_POISON_DURATION = 2

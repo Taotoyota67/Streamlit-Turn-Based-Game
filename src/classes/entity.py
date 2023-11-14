@@ -1,8 +1,11 @@
-from typing import TypeVar, Optional
+from typing import Optional, TypeVar
 
-from classes.text import EntityText
+import config
+from classes.enums import MoveType
+from classes.errors import CannotMakeMove, InvalidMove
 from classes.skills import Buff, Poison
 from classes.stats import Stats
+from classes.text import EntityText
 
 T = TypeVar("T", bound="Entity")
 
@@ -40,7 +43,7 @@ class Entity:
     def serialize(self) -> dict:
         return {
             "stats": self.stats.serialize(),
-            "poisons": [[i.duration, i.damage] for i in self._poisons],
+            "poisons": [[i.duration, i.multiplier] for i in self._poisons],
             "stun": self._stun
         }
 
@@ -52,7 +55,8 @@ class Entity:
 
         for index, poison in enumerate(self._poisons):
             # Take effect
-            self.stats.health.reduce(poison.damage, 0)
+            damage = int(self.stats.get("max_health") * poison.multiplier)
+            self.stats.health.reduce(damage, 0)
 
             # Reduce poison turns
             self._poisons[index].duration -= 1
@@ -85,14 +89,14 @@ class Entity:
         """
         return bool(self._poisons)
 
-    def add_poison(self, duration: int, value: int) -> None:
+    def add_poison(self, duration: int, multiplier: float) -> None:
         """Add poison to an entity
 
         Args:
             duration (int): How long is the poison? (turns)
-            value (int): damage per turn
+            multiplier (float): damage% per turn
         """
-        self._poisons.append(Poison(duration, value))
+        self._poisons.append(Poison(duration, multiplier))
 
     def add_buff(self, duration: int, multiplier: float) -> None:
         """Add buff to this entity
@@ -148,3 +152,44 @@ class Entity:
         target.stats.health.reduce(damage, 0)
 
         return damage
+
+    def make_move(self, move: MoveType, target: "Entity") -> int:
+        if self.is_stun or not self.is_alive():
+            raise CannotMakeMove
+
+        ret = 0
+
+        if move == MoveType.ATTACK:
+            ret = self.attack(target)
+        elif move == MoveType.DAMAGE_BUFF:
+            ret = self.attack(target, self.get_damage() * 2)
+        elif move == MoveType.HEAL:
+            max_health = self.stats.get("max_health")
+            heal_amount = int(max_health * config.PLAYER_HEAL_MULTIPLIER)
+            self.stats.health.increase(heal_amount, max_health)
+            ret = heal_amount
+        elif move == MoveType.POISON:
+            self.add_poison(
+                config.PLAYER_POISON_DURATION,
+                config.PLAYER_POISON_MULTIPLIER
+            )
+            ret = 1
+        elif move == MoveType.LIFE_STEAL:
+            damage = self.attack(target)
+            self.stats.health.increase(
+                damage,
+                self.stats.get("max_health")
+            )
+            ret = damage
+        elif move == MoveType.STUN:
+            target.stun()
+            ret = 1
+        elif move == MoveType.MANA_DRAIN:
+            mana_amount = int(target.stats.get("max_mana") *
+                              config.MONSTER_MANA_DRAIN_MULTIPLIER)
+            target.stats.mana.reduce(mana_amount)
+            ret = mana_amount
+        else:
+            raise InvalidMove
+
+        return ret
