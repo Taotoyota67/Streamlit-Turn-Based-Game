@@ -1,7 +1,11 @@
-from typing import TypeVar, Optional
+from typing import Optional, TypeVar
 
-from classes.text import EntityText
+import config
+from classes.enums import MoveType
+from classes.errors import CannotMakeMove, InvalidMove
 from classes.skills import Buff, Poison
+from classes.stats import Stats
+from classes.text import EntityText
 
 T = TypeVar("T", bound="Entity")
 
@@ -15,15 +19,11 @@ class Entity:
             hp (float): entity health.
             mana (float): entity mana.
         """
-        self.damage = kwargs.get("damage", 0)
-
-        hp = kwargs.get("health", 0)
-        self.health = hp
-        self.max_health = hp
-
-        mana = kwargs.get("mana", 0)
-        self.mana = mana
-        self.max_mana = mana
+        stats = kwargs.get("stats", None)
+        if stats:
+            self.stats: Stats = stats
+        else:
+            self.stats = Stats(**kwargs)
 
         self._poisons: list[Poison] = []  # [[duration, value]
         self._buffs: list[Buff] = []
@@ -38,16 +38,12 @@ class Entity:
         Returns:
             bool: alive.
         """
-        return self.health > 0
+        return self.stats.get("health") > 0
 
     def serialize(self) -> dict:
         return {
-            "damage": self.damage,
-            "health": self.health,
-            "maxHealth": self.max_health,
-            "mana": self.mana,
-            "maxMana": self.max_mana,
-            "poisons": [[i.duration, i.damage] for i in self._poisons],
+            "stats": self.stats.serialize(),
+            "poisons": [[i.duration, i.multiplier] for i in self._poisons],
             "stun": self._stun
         }
 
@@ -55,11 +51,12 @@ class Entity:
         """Applied one tick of combat state. (Poison, Mana regen, etc.)
         """
         # Increase mana by 1 every turns.
-        self.increase_mana(1)
+        self.stats.mana.increase(1, self.stats.get('mana_max'))
 
         for index, poison in enumerate(self._poisons):
             # Take effect
-            self.reduce_health(poison.damage)
+            damage = int(self.stats.get("max_health") * poison.multiplier)
+            self.stats.health.reduce(damage, 0)
 
             # Reduce poison turns
             self._poisons[index].duration -= 1
@@ -76,24 +73,38 @@ class Entity:
         """
         self._stun = 2
 
-    def can_move(self) -> bool:
-        """Can this entity make a move?
+    def is_stun(self) -> bool:
+        """Is this entity stun?
 
         Returns:
             bool: Yes or Nah
         """
-        return (not self._stun) and self.is_alive()
+        return bool(self._stun)
 
-    def add_poison(self, duration: int, value: int) -> None:
+    def is_poison(self) -> bool:
+        """Is this entity has poison?
+
+        Returns:
+            bool: Ye or na
+        """
+        return bool(self._poisons)
+
+    def add_poison(self, duration: int, multiplier: float) -> None:
         """Add poison to an entity
 
         Args:
             duration (int): How long is the poison? (turns)
-            value (int): damage per turn
+            multiplier (float): damage% per turn
         """
-        self._poisons.append(Poison(duration, value))
+        self._poisons.append(Poison(duration, multiplier))
 
     def add_buff(self, duration: int, multiplier: float) -> None:
+        """Add buff to this entity
+
+        Args:
+            duration (int): Buff duration
+            multiplier (float): Buff multiplier
+        """
         self._buffs.append(Buff(duration, multiplier))
 
     def clear_poisons(self) -> None:
@@ -112,115 +123,13 @@ class Entity:
         self._poisons = [i for i in self._poisons if i.duration > 0]
         self._buffs = [i for i in self._buffs if i.duration > 0]
 
-    def set_health(self, health: int) -> None:
-        """Set entity current health. (Cannot exceed max health)
-
-        Args:
-            health (int): amount of health.
-        """
-        self.health = min(health, self.max_health)
-
-    def set_max_health(self, health: int) -> None:
-        """Set entity max health (will NOT change current health)
-
-        Args:
-            health (int): amount of health.
-        """
-        self.max_health = health
-
-    def get_heal_amount(self) -> int:
-        raise NotImplementedError
-
-    def increase_health(self, amount: int) -> None:
-        """Increase entity current health. (Cannot exceed max health)
-
-        Args:
-            amount (int): amount of health to increase.
-        """
-        self.health = min(self.health + amount, self.max_health)
-
-    def increase_max_health(self, amount: int) -> None:
-        """Increase entity max health (Will also increase current health)
-
-        Args:
-            amount (int): amount of health to increase.
-        """
-        self.max_health += amount
-        self.health += amount
-
-    def reduce_health(self, amount: int) -> None:
-        """Reduce entity current health (Will not goes below 0)
-
-        Args:
-            amount (int): amount of health to reduce.
-        """
-        self.health = max(self.health - amount, 0)
-
-    def reduce_max_health(self, amount: int) -> None:
-        """Reduce entity max health.
-        Max health will not go below 1.
-        (Will also reduce current health, entity will not die from this)
-
-        Args:
-            amount (int): amount of max health to reduce.
-        """
-        self.max_health = max(self.max_health - amount, 1)
-        self.health = max(self.health - amount, self.max_health)
-
-    def set_mana(self, mana: int) -> None:
-        """Set entity current mana. (Will not exceed max mana)
-
-        Args:
-            mana (int): amount of mana.
-        """
-        self.mana = min(mana, self.max_mana)
-
-    def set_max_mana(self, mana: int) -> None:
-        """Set entity max mana (Will NOT change current mana)
-
-        Args:
-            mana (int): amount of mana.
-        """
-        self.max_mana = mana
-
-    def increase_mana(self, amount: int) -> None:
-        """Increase entity current mana (Will not exceed max_mana)
-
-        Args:
-            amount (int): amount of mana.
-        """
-        self.mana = min(self.mana + amount, self.max_mana)
-
-    def increase_max_mana(self, amount: int) -> None:
-        """Increase entity max mana (Will also increase current mana)
-
-        Args:
-            amount (int): amount of mana.
-        """
-        self.max_mana += amount
-        self.mana += amount
-
-    def reduce_mana(self, amount: int) -> None:
-        """Reduce entity current mana (Will not goes below 0)
-
-        Args:
-            amount (int): _description_
-        """
-        self.mana = max(self.mana - amount, 0)
-
-    def reduce_max_mana(self, amount: int) -> None:
-        """Reduce entity max mana.
-        Max mana will not goes below 0
-        (Will also reduce current mana, will not goes below max mana.)
-
-        Args:
-            amount (int): _description_
-        """
-        self.max_mana = max(self.max_mana - amount, 0)
-        self.mana = max(self.mana - amount, self.max_mana)
-
     def get_damage(self) -> int:
-        damage = self.damage
+        """Get damage, Call this function before `attack`
+
+        Returns:
+            int: amount of damage
+        """
+        damage = self.stats.damage.get()
 
         for buff in self._buffs:
             damage *= buff.multiplier
@@ -240,6 +149,47 @@ class Entity:
         if not damage:
             damage = self.get_damage()
 
-        target.reduce_health(damage)
+        target.stats.health.reduce(damage, 0)
 
         return damage
+
+    def make_move(self, move: MoveType, target: "Entity") -> int:
+        if self.is_stun or not self.is_alive():
+            raise CannotMakeMove
+
+        ret = 0
+
+        if move == MoveType.ATTACK:
+            ret = self.attack(target)
+        elif move == MoveType.DAMAGE_BUFF:
+            ret = self.attack(target, self.get_damage() * 2)
+        elif move == MoveType.HEAL:
+            max_health = self.stats.get("max_health")
+            heal_amount = int(max_health * config.PLAYER_HEAL_MULTIPLIER)
+            self.stats.health.increase(heal_amount, max_health)
+            ret = heal_amount
+        elif move == MoveType.POISON:
+            self.add_poison(
+                config.PLAYER_POISON_DURATION,
+                config.PLAYER_POISON_MULTIPLIER
+            )
+            ret = 1
+        elif move == MoveType.LIFE_STEAL:
+            damage = self.attack(target)
+            self.stats.health.increase(
+                damage,
+                self.stats.get("max_health")
+            )
+            ret = damage
+        elif move == MoveType.STUN:
+            target.stun()
+            ret = 1
+        elif move == MoveType.MANA_DRAIN:
+            mana_amount = int(target.stats.get("max_mana") *
+                              config.MONSTER_MANA_DRAIN_MULTIPLIER)
+            target.stats.mana.reduce(mana_amount)
+            ret = mana_amount
+        else:
+            raise InvalidMove
+
+        return ret

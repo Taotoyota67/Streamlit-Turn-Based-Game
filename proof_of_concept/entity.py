@@ -147,3 +147,55 @@ class Slime(EntityStats):
 
 class Player(EntityStats):
     pass
+
+
+class Goodboy(EntityStats):
+    def __init__(self, max_hp: int, damage: int, heal: int = 0, mana: int = 0) -> None:
+        super().__init__(max_hp, damage, heal, mana)
+
+        self.text = EntityText()
+        self.text.set(
+            "got_hit",
+            Text().add(
+                "Tsk..."
+            ).add(
+                "So annoying"
+            ).add(
+                "Is that all you got"
+            ).add(
+                "AH..."
+            )
+        )
+
+        self.text.set(
+            "do_hit",
+            Text().add(
+                "W E A K"
+            ).add(
+                "let me show you."
+            ).add(
+                "I'm not holding back."
+            )
+        )
+
+        self.text.set(
+            "do_heal",
+            Text().add(
+                "Did you think it will end that easily."
+            ).add(
+                "Not yet"
+            ).add(
+                "Come Onnnn"
+            )
+        )
+
+        self._image = Image()
+        self._image["alive"] = "good_boy.png"
+        self._image["dead"] = "good_boy_dead.jpg"
+
+    def set_text(self, text: EntityText) -> None:
+        self.text = text
+
+    @property
+    def image(self):
+        return self._image["alive"] if self.current_hp > 0 else self._image["dead"]

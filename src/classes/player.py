@@ -1,90 +1,65 @@
-from classes.playerdata import PlayerData
+
+import config
 from classes.entity import Entity
-
-
-class PlayerException(Exception):
-    """Player Exceptions"""
-
-
-class PlayerAlreadyInCombat(PlayerException):
-    """Player already in combat!"""
-
-
-class PlayerNotInCombat(PlayerException):
-    """Player is not in combat!"""
-
-
-class PlayerStats:
-    def __init__(self):
-        self.reset_stats()
-
-    @property
-    def damage(self) -> float:
-        return self._damage
-
-    @property
-    def defense(self) -> float:
-        return self._defense
-
-    @property
-    def health(self) -> float:
-        return self._health
-
-    @property
-    def mana(self) -> float:
-        return self._mana
-
-    def serialize(self) -> dict:
-        return {
-            "damage": self._damage,
-            "defense": self._defense,
-            "health": self._health,
-            "mana": self._mana
-        }
-
-    def reset_stats(self):
-        self._damage = 10
-        self._defense = 0
-        self._health = 100
-        self._mana = 100
-
-    def set_damage(self, damage: float) -> None:
-        self._damage = damage  # pylint: disable=W0201 # (define variable outside __init__)
-
-    def set_defense(self, defense: float) -> None:
-        self._defense = defense  # pylint: disable=W0201
-
-    def set_health(self, health: float) -> None:
-        self._health = health  # pylint: disable=W0201
-
-    def set_mana(self, mana: float) -> None:
-        self._mana = mana  # pylint: disable=W0201
+from classes.enums import MoveType
+from classes.playerdata import PlayerData
+from classes.skills import PlayerSkill
+from classes.stats import Stats
 
 
 class Player:
     def __init__(self, username: str) -> None:
-        self._username = username
+        self.username = username
         self._pdata = PlayerData(username)
-        self._stats = PlayerStats()
-        self.entity = Entity(
-            damage=self._stats.damage,
-            health=self._stats.health,
-            defense=self._stats.defense,
-            mana=self._stats.mana,
-        )
+        self.stats = Stats(**config.PLAYER_DEFAULT_STATS)
+        self.entity = Entity(stats=self.stats)
+        self.skills = PlayerSkill(self.stats)
 
-    @property
-    def username(self) -> str:
-        return self._username
+    def tick(self) -> None:
+        """Tick, Call this at the start of the turn.
+        """
+        return self.entity.tick()
 
-    @property
-    def stats(self) -> PlayerStats:
-        return self._stats
+    def is_alive(self) -> bool:
+        """Is player entity alive?
+
+        Returns:
+            bool: Yes or naa?
+        """
+        return self.entity.is_alive()
+
+    def is_poison(self) -> bool:
+        """Is player entity poisoned?
+
+        Returns:
+            bool: Yay or Nay
+        """
+        return self.entity.is_poison()
+
+    def is_stun(self) -> bool:
+        """Is player entity stunned?
+
+        Returns:
+            bool: Yes or no
+        """
+        return self.entity.is_stun()
+
+    def make_move(self, move: MoveType, target: Entity) -> int:
+        """Make a move
+
+        Args:
+            move (MoveType): enums from game.enums.MoveType
+            target (Entity): target of the move. (if heal, put player.entity)
+
+        Returns:
+            int: amount of damage or amount of heal, could be 1 for poison and etc.
+        """
+        return self.entity.make_move(move, target)
 
     def save(self) -> None:
         """Save player.
         """
-        self._pdata["playerStats"] = self._stats.serialize()
+        self._pdata["playerStats"] = self.stats.serialize()
         self._pdata["playerCombat"] = self.entity.serialize()
 
         self._pdata.save()

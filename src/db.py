@@ -1,6 +1,5 @@
 import json
-from typing import Any, TypeVar, Type
-
+from typing import Any, Type, TypeVar
 
 T = TypeVar("T", bound="Database")
 

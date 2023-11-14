@@ -1,6 +1,8 @@
-# from db import db # Not used, yet
+from typing import Optional
+
+from classes import enums, errors
+from classes.monsters import Monster, Monsters
 from classes.player import Player
-from classes.monsters import Monsters
 
 
 class Game:
@@ -13,6 +15,14 @@ class Game:
         # To call monster:
         # monster = game.monster.get("slime", damage=2, hp=20, mana=10).set_name("Your weird name")
         self.monsters = Monsters()
+        self.monster: Optional[Monster] = None
+        self.errors = errors
+        self.enums = enums
+
+    def get_monster(self, monster: str):
+        monster_obj = self.monsters.get(monster)
+        self.monster = monster_obj
+        return monster_obj
 
     def save(self) -> None:
         """Save game.
