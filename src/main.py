@@ -1,10 +1,12 @@
 import streamlit as st
 
-from accounts import Accounts
+from accounts import Accounts, AccountAlreadyExists
+from game import Game
+from utils.layout import setup_page
 
 # My import
 
-from entity2 import Player
+# from entity2 import Player
 from storage import PersistanceStorage
 import random
 from time import sleep
@@ -13,120 +15,170 @@ import altair as alt
 
 # My import
 
-account = Accounts()
+sess = PersistanceStorage(st)
+acc = sess.gset("accounts", Accounts())
+username = sess.gset("username", "")
+password = sess.gset("password", "")
+login_status = sess.gset("login_status", True)
+game = sess.gset("game", Game("admin"))
 
 
 if "page" not in st.session_state:
-    st.session_state["page"] = "main_menu"
+    st.session_state["page"] = "main_page"
 
 
 def change_page(page: str) -> None:
     st.session_state["page"] = page
 
 
-def main():
-    st.title("Welcome to THE GAME")
-    st.write("Is this your first time?")
-
+def main_page():
+    # setup_page(st)
+    col1, col2, col3 = st.columns([0.125, 0.75, 0.125])
+    col2.markdown(
+        "<h1 style='text-align: center; color: blue;'>PROJECT M</h1>", unsafe_allow_html=True)
+    col2.markdown(
+        "<h5 style='text-align: center;'>Is this your first time?</h5>", unsafe_allow_html=True)
+    col2.title("")
+    col2.title("")
     # Buttons
-    st.button("Yes", on_click=change_page, args=("create_account", ))
+    col2.button("**:blue[Yes]**", on_click=change_page, args=(
+        "create_account_page", ), use_container_width=True)
+    col2.title("")
     # st.button("No", on_click=change_page, args=("login", ))
-    st.button("No", on_click=change_page, args=("choosing_status", ))
+    col2.button("**No**", on_click=change_page, args=(
+        "login_page", ), use_container_width=True)
 
 
-def login_page():
-    ...
-
-
-def create_account_page(text: str = None):
-    st.title("Let's create an account then...")
-    st.write("What is your username?")
-    if text:
-        st.write(text)
+def create_account_page():
+    # setup_page(st)
+    global username
+    if acc.has(username):
+        st.title(":red[Account already exists!]")
     else:
-        st.write("*The Confirm button will be disable if your username sucks.*")
+        st.title(":blue[Let's create an account then...]")
+
+    st.write("What is your username?")
+    if not username:
+        st.write(
+            "*The Confirm button will be disable if your username sucks.*")
+    else:
+        st.write(f"Your username is :blue[**{username}**]")
 
     # Text input
     text = st.text_input(
-        "Username",
-        max_chars=16,
-        placeholder="Enter a username",
-        label_visibility="hidden"
-    )
+        "Username", max_chars=16,
+        placeholder="Enter a username", label_visibility="hidden")
+
+    # Rerun after changing text
+    if text != username:
+        sess["username"] = text
+        st.rerun()
 
     # Buttons
-    st.button("Confirm", on_click=None,
-              disabled=account.check_username(text),
-              )
-    st.button("Back", on_click=change_page, args=("main_menu", ))
+    st.button("Confirm", on_click=change_page,
+              disabled=acc.check_username(username),
+              args=("create_password_page",))
+    st.button("Back", on_click=change_page, args=("main_page",))
+
+
+def create_password_page():
+    # setup_page(st)
+    global username, password
+    st.title(":blue[Good name!]")
+    st.write(f"Now :blue[**{username}**], What is your password?")
+
+    # Text input
+    text = st.text_input("password", placeholder="Enter a password",
+                         label_visibility="hidden",
+                         type="password")
+
+    # Rerun after changing text
+    if text != password:
+        sess["password"] = text
+        st.rerun()
+
+    # Buttons
+    st.button("Confirm", on_click=change_page,
+              disabled=len(password) < 3, args=("create_account",))
+    st.button("Back", on_click=change_page, args=("create_account_page",))
+
+
+def create_account():
+    # setup_page(st)
+    global acc, username, password
+    st.title(":blue[Creating account...]")
+    try:
+        acc.add(username, password)
+    except AccountAlreadyExists:
+        change_page("create_account_page")
+        st.rerun()
+
+    sleep(2.0)
+    change_page("login")
+    st.rerun()
+
+
+def login_page():
+    # setup_page(st)
+    global acc, username, password
+
+    st.title(
+        ":blue[Welcome back!]" if login_status else ":red[Incorrect username or password :(]"
+    )
+    st.write("I promise I won't leak it.")
+
+    # Text inputs
+    user_text = st.text_input(
+        "Username", max_chars=16,
+        placeholder="Enter a username", label_visibility="hidden")
+    pass_text = st.text_input("password", placeholder="Enter a password",
+                              label_visibility="hidden",
+                              type="password")
+
+    if user_text != username:
+        sess["username"] = user_text
+        st.rerun()
+    if pass_text != password:
+        sess["password"] = pass_text
+        st.rerun()
+
+    # Buttons
+    st.button("Login", on_click=change_page, args=("login",))
+    st.button("Back", on_click=change_page, args=("main_page",))
+
+
+def login():
+    # setup_page(st)
+    global acc, username, password
+    st.title(":blue[Logging in...]")
+    try:
+        success = acc.login(username, password)
+    except KeyError:  # No account
+        sess["login_status"] = False
+        change_page("login_page")
+        st.rerun()
+
+    if not success:
+        sess["login_status"] = success
+        change_page("login_page")
+        st.rerun()
+
+    sess["game"] = Game(username)
+    change_page("choosing_status")
+    st.rerun()
 
 
 def choosing_status():
-    sess = PersistanceStorage(st)
-    sess.gset("choose", "unknown")
-    sess.gset("anable_confirm", False)
-    sess.gset("confirm", False)
-    # st.write("<style>text-align: center;</style>", unsafe_allow_html=True)
-    col1, col2 = st.columns([0.7, 0.3], gap="large")
-    col1.title(":blue[Choose your status]")
-
-    def write_status(hp, mana, atk, heal):
-        col1.write(f"HP: {hp}")
-        col1.write(f"MANA: {mana}")
-        col1.write(f"ATK: {atk}")
-        col1.write(f"HEAL: {heal}")
-        status = {'Status': ['HP', "MANA", "ATK", "HEAL"],
-                  'amount': [hp, mana, atk, heal]}
-        col2.title(" ")
-        col2.title(" ")
-        col2.title(" ")
-        d_hp = pd.DataFrame(status)
-        my_chart = alt.Chart(d_hp).mark_bar().encode(
-            x="Status",
-            y=alt.X("amount", scale=alt.Scale(domain=[0, 150]))
-        ).properties(width=200)
-        col2.altair_chart(my_chart)
-
-    # Status Choice
-    if col1.button("1st status", disabled=sess["confirm"], use_container_width=True):
-        write_status(100, 100, 10, 10)
-        sess["choose"] = "1st"
-        sess["anable_confirm"] = True
-    if col1.button("2nd status", disabled=sess["confirm"], use_container_width=True):
-        write_status(150, 50, 20, 5)
-        sess["choose"] = "2nd"
-        sess["anable_confirm"] = True
-    if col1.button("3rd status", disabled=sess["confirm"], use_container_width=True):
-        write_status(50, 150, 20, 20)
-        sess["choose"] = "3rd"
-        sess["anable_confirm"] = True
-
-    if col1.button("CONFIRM", disabled=not sess["anable_confirm"]):
-        sess["confirm"] = True
-        st.rerun()
-
-    # Showing status after confirm
-    if sess["confirm"]:
-        col1.subheader(":blue[Chose Status]")
-        if sess["choose"] == "1st":
-            write_status(100, 100, 10, 10)
-            sess.gset("player", Player(100, 10, 10, 100))
-        elif sess["choose"] == "2nd":
-            write_status(150, 50, 20, 5)
-            sess.gset("player", Player(150, 20, 5, 50))
-        elif sess["choose"] == "3rd":
-            write_status(50, 150, 20, 20)
-            sess.gset("player", Player(50, 20, 20, 150))
-
-        if col1.button("NEXT"):
-            sess["page"] = "fight"
-            st.rerun()
+    st.write("Not out yet")
 
 
 pages = {
-    "main_menu": main,
-    "login": login_page,
-    "create_account": create_account_page,
+    "main_page": main_page,
+    "create_account_page": create_account_page,
+    "create_password_page": create_password_page,
+    "create_account": create_account,
+    "login_page": login_page,
+    "login": login,
     "choosing_status": choosing_status
 }
 
