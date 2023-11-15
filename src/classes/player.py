@@ -1,4 +1,3 @@
-
 import config
 from classes.entity import Entity
 from classes.enums import MoveType
@@ -13,7 +12,7 @@ class Player:
         self.username = username
         self._pdata = PlayerData(username)
         self.stats = Stats(**config.PLAYER_DEFAULT_STATS)
-        self.entity = Entity(stats=self.stats)
+        self.entity = Entity(stats=self.stats, is_player=True)
         self.skills = PlayerSkill(self.stats)
 
     def tick(self) -> None:
@@ -33,7 +32,7 @@ class Player:
         """Is player entity poisoned?
 
         Returns:
-            bool: Yay or Nay
+            bool: Yay or Nay.
         """
         return self.entity.is_poison()
 
@@ -41,22 +40,27 @@ class Player:
         """Is player entity stunned?
 
         Returns:
-            bool: Yes or no
+            bool: Yes or no.
         """
         return self.entity.is_stun()
 
     def make_move(self, move: MoveType, target: Entity) -> int:
-        """Make a move
+        """Make a move.
 
         Args:
-            move (MoveType): enums from game.enums.MoveType
-            target (Entity): target of the move. (if heal, put player.entity)
+            move (MoveType): Enums from game.enums.MoveType
+            target (Entity): target of the move. (if heal, put player.entity or monster.)
 
         Returns:
             int: amount of damage or amount of heal, could be 1 for poison and etc.
         """
         if not self.skills.can_use(move):
-            raise CannotMakeMove
+            raise CannotMakeMove(
+                "Cannot make a move due to mana or skill not granted."
+            )
+
+        mana_cost = config.PLAYER_MOVE_COSTS[move.value]
+        self.stats.mana.reduce(mana_cost, 0)
 
         return self.entity.make_move(move, target)
 

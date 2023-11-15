@@ -6,7 +6,7 @@ class Image:
 
     def __getitem__(self, __name: str) -> bytes:
         if __name not in self._images:
-            raise KeyError(f"Image named {__name}; not found")
+            raise KeyError(f"Image named {__name}; not found.")
 
         if __name in self._bimages:
             return self._bimages[__name]

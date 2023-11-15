@@ -37,20 +37,12 @@ class Monster(Entity):
         """Random move from monster, edit at config.py
 
         Returns:
-            MoveType: move
+            MoveType: game.enums.MoveType
         """
         weights = list(self.moves.values())
         moves = [MoveType[i.upper()] for i in self.moves.keys()]
 
         return random.choices(moves, weights=weights)[0]
-
-    def get_heal_amount(self) -> int:
-        """Get heal amount (Settings in config.py)
-
-        Returns:
-            int: _description_
-        """
-        return int(config.MONSTER_HEAL_MULTIPLIER * self.stats.get("max_health"))
 
 
 class Monsters:
