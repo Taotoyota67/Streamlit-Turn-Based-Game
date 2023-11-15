@@ -24,4 +24,4 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint src/*.py -d C0103,C0114,C0115,C0116,W1514,W0201,R0903
+        pylint src -d C0103,C0114,C0115,C0116,W1514,W0201,R0903
