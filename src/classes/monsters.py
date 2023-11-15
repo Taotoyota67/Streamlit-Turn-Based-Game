@@ -27,6 +27,12 @@ class Monster(Entity):
     def image(self) -> bytes:
         return self._image["alive"] if self.is_alive() else self._image["dead"]
 
+    def serialize(self) -> dict:
+        return {
+            "name": self.name,
+            "entity": super().serialize()
+        }
+
     def set_text(self, key: str, value: list[str]) -> None:
         self.text.set(
             key,
@@ -53,7 +59,7 @@ class Monsters:
     def load_monster(self) -> None:
         for monster, setting in config.MONSTERS.items():
             self._monsters[monster] = Monster(
-                **setting
+                name=monster, **setting
             )
 
     def get(self, monster: str) -> Monster:

@@ -22,6 +22,11 @@ class PlayerSkill:
         self._stats = stats
         self._moves = [MoveType.ATTACK, ]
 
+    def serialize(self) -> dict:
+        return {
+            "moves": [i.value for i in self._moves]
+        }
+
     def grant(self, move: MoveType) -> None:
         """Grant a move.
 

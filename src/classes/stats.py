@@ -71,5 +71,5 @@ class Stats:
             "health": self.get("health"),
             "maxHealth": self.get("max_health"),
             "mana": self.get("mana"),
-            "maxMana": self.get("max_man")
+            "maxMana": self.get("max_mana")
         }

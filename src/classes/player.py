@@ -2,7 +2,6 @@ import config
 from classes.entity import Entity
 from classes.enums import MoveType
 from classes.errors import CannotMakeMove
-from classes.playerdata import PlayerData
 from classes.skills import PlayerSkill
 from classes.stats import Stats
 
@@ -10,7 +9,6 @@ from classes.stats import Stats
 class Player:
     def __init__(self, username: str) -> None:
         self.username = username
-        self._pdata = PlayerData(username)
         self.stats = Stats(**config.PLAYER_DEFAULT_STATS)
         self.entity = Entity(stats=self.stats, is_player=True)
         self.skills = PlayerSkill(self.stats)
@@ -64,10 +62,8 @@ class Player:
 
         return self.entity.make_move(move, target)
 
-    def save(self) -> None:
-        """Save player.
-        """
-        self._pdata["playerStats"] = self.stats.serialize()
-        self._pdata["playerCombat"] = self.entity.serialize()
-
-        self._pdata.save()
+    def serialize(self) -> dict:
+        return {
+            "entity": self.entity.serialize(),
+            "skills": self.skills.serialize()
+        }

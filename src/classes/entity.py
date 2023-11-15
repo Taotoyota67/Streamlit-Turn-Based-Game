@@ -33,6 +33,14 @@ class Entity:
         self.name = kwargs.get("name", None)
         self.text = EntityText()
 
+    def serialize(self) -> dict:
+        return {
+            "stats": self.stats.serialize(),
+            "poisons": [[i.duration, i.multiplier] for i in self._poisons],
+            "buffs": [[i.duration, i.multiplier] for i in self._buffs],
+            "stun": self._stun
+        }
+
     def is_alive(self) -> bool:
         """Is entity alive?
 
@@ -41,12 +49,21 @@ class Entity:
         """
         return self.stats.get("health") > 0
 
-    def serialize(self) -> dict:
-        return {
-            "stats": self.stats.serialize(),
-            "poisons": [[i.duration, i.multiplier] for i in self._poisons],
-            "stun": self._stun
-        }
+    def is_stun(self) -> bool:
+        """Is this entity stun?
+
+        Returns:
+            bool: Yes or Nah.
+        """
+        return bool(self._stun)
+
+    def is_poison(self) -> bool:
+        """Is this entity has poison?
+
+        Returns:
+            bool: Ye or na.
+        """
+        return bool(self._poisons)
 
     def tick(self) -> None:
         """Applied one tick of combat state. (Poison, Mana regen, etc.)
@@ -73,22 +90,6 @@ class Entity:
         """Stun this entity.
         """
         self._stun = 2
-
-    def is_stun(self) -> bool:
-        """Is this entity stun?
-
-        Returns:
-            bool: Yes or Nah.
-        """
-        return bool(self._stun)
-
-    def is_poison(self) -> bool:
-        """Is this entity has poison?
-
-        Returns:
-            bool: Ye or na.
-        """
-        return bool(self._poisons)
 
     def add_poison(self, duration: int, multiplier: float) -> None:
         """Add poison to an entity.
@@ -137,6 +138,11 @@ class Entity:
 
         return int(damage)
 
+    def get_heal_multiplier(self) -> float:
+        if self._is_player:
+            return config.PLAYER_HEAL_MULTIPLIER
+        return config.MONSTER_HEAL_MULTIPLIER
+
     def attack(self, target: "Entity", damage: Optional[int] = None) -> int:
         """Attack an entity. (Never pass in a damage! For backend only!)
 
@@ -153,11 +159,6 @@ class Entity:
         target.stats.health.reduce(damage, 0)
 
         return damage
-
-    def get_heal_multiplier(self) -> float:
-        if self._is_player:
-            return config.PLAYER_HEAL_MULTIPLIER
-        return config.MONSTER_HEAL_MULTIPLIER
 
     def make_move(self, move: MoveType, target: "Entity") -> int:
         if self.is_stun() or not self.is_alive():
