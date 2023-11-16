@@ -8,7 +8,26 @@ class PersistanceStorage:
         self.st = st
         self.session = st.session_state
 
-    def gset(self, key: Any, value: T) -> T:
+    def nset(self, key: Any, value: Any) -> None:
+        """Set if not exists.
+
+        Args:
+            key (Any): The key.
+            value (Any): Value.
+        """
+        if key not in self.session:
+            self.session[key] = value
+
+    def gset(self, key: str, value: T) -> T:
+        """Get if exists and set if not exists.
+
+        Args:
+            key (Any): The key.
+            value (T): The value.
+
+        Returns:
+            T: The value.
+        """
         if key in self.session:
             return self.session[key]
 
