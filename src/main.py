@@ -169,7 +169,84 @@ def login():
 
 
 def choosing_status():
-    st.write("Not out yet")
+    sess.gset("choose", "unknown")
+    sess.gset("anable_confirm", False)
+    sess.gset("confirm", False)
+    sess.gset("skills_list", [])
+    col1, col2 = st.columns([0.7, 0.3], gap="large")
+    col1.title(":blue[Choose your status]")
+
+    def write_status(hp, mana, atk, heal):
+        col2.title(" ")
+
+        status = {'Status': ['HP', "MANA", "ATK", "HEAL"],
+                  'amount': [hp, mana, atk, heal]}
+        d_hp = pd.DataFrame(status)
+        my_chart = alt.Chart(d_hp).mark_bar().encode(
+            x="Status",
+            y=alt.X("amount", scale=alt.Scale(domain=[0, 150]))
+        ).properties(width=200)
+
+        col2.altair_chart(my_chart)
+        col2.subheader(":blue[Chosen Status]")
+
+        col2.write(f"HP: {hp}")
+        col2.write(f"MANA: {mana}")
+        col2.write(f"ATK: {atk}")
+        col2.write(f"HEAL: {heal}")
+
+    def write_skills():
+        col2.subheader(":blue[Chosen Skills]")
+        for num, skill in enumerate(sess["skills_list"]):
+            col2.write(f"{num + 1}. {skill}")
+
+    # Status Choice
+    if col1.button("1st status", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "1st"
+        sess["anable_confirm"] = True
+        st.rerun()
+    if col1.button("2nd status", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "2nd"
+        sess["anable_confirm"] = True
+        st.rerun()
+    if col1.button("3rd status", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "3rd"
+        sess["anable_confirm"] = True
+        st.rerun()
+
+    col1.title(":blue[Choose your skills]")
+    col1.write("choose 3 from 5 skills")
+
+    # Skills multiselect
+    skills_list = col1.multiselect(label="", options=["DAMAGE BUFF", "HEAL", "POISON", "LIFE STEAL", "STUN"],
+                                   default=sess["skills_list"],
+                                   max_selections=3,
+                                   disabled=sess["confirm"],
+                                   label_visibility="collapsed")
+
+    if skills_list != sess["skills_list"]:
+        sess["skills_list"] = skills_list
+        st.rerun()
+
+    if col1.button("CONFIRM STATUS AND SKILLS", disabled=(not (sess["anable_confirm"])) or (not len(sess["skills_list"]) == 3) or sess["confirm"]):
+        sess["confirm"] = True
+        st.rerun()
+
+    # Write status after clicking button
+    if sess["choose"] != "unknown":
+        if sess["choose"] == "1st":
+            write_status(100, 100, 10, 10)
+            # sess.gset("player", Player(100, 10, 10, 100))
+        elif sess["choose"] == "2nd":
+            write_status(150, 50, 20, 5)
+            # sess.gset("player", Player(150, 20, 5, 50))
+        elif sess["choose"] == "3rd":
+            write_status(50, 150, 20, 20)
+            # sess.gset("player", Player(50, 20, 20, 150))
+
+    # Write skills after clicking confirm
+    if sess["confirm"]:
+        write_skills()
 
 
 pages = {
