@@ -138,10 +138,3 @@ class GameManager:
 
     def upgrade_page(self):
         ...
-
-# game = Game(username)
-# game.username
-# game.player.stats.attack_level
-# game.player.stats.attack_damage
-# game.player.attack(game.monsters.slime)
-# game.combat.spawn(game.entity.Slime())

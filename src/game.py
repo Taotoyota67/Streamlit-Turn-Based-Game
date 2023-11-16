@@ -14,8 +14,6 @@ class Game:
         self.username = username.lower()
         self.player = Player(self.username)
         self.__pdata = PlayerData(self.username)
-        # To call monster:
-        # monster = game.monster.get("slime", damage=2, hp=20, mana=10).set_name("Your weird name")
         self.monsters = Monsters()
         self.monster: Optional[Monster] = None
         self.errors = errors

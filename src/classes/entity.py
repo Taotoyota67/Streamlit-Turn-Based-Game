@@ -82,8 +82,7 @@ class Entity:
         # Clear out poison if duration ran out
         self._clear_ran_out()
 
-        # Remove stun
-        # if self.is_stun:
+        # Reduce stun
         self._stun = max(self._stun - 1, 0)
 
     def stun(self) -> None:
