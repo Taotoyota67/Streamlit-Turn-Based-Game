@@ -1,5 +1,5 @@
 import random
-from typing import Dict, Set
+from typing import Dict
 
 import config
 from classes.entity import Entity
