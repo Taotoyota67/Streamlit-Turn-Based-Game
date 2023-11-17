@@ -1,5 +1,5 @@
 import random
-from typing import Dict
+from typing import Dict, Set
 
 import config
 from classes.entity import Entity
@@ -53,14 +53,31 @@ class Monster(Entity):
 
 class Monsters:
     def __init__(self) -> None:
-        self._monsters: Dict[str, Monster] = {}
-        self.load_monster()
+        self.__monsters = config.MONSTERS
 
-    def load_monster(self) -> None:
-        for monster, setting in config.MONSTERS.items():
-            self._monsters[monster] = Monster(
-                name=monster, **setting
-            )
+    def get_all_names(self) -> list[str]:
+        """Get all monster names.
+
+        Returns:
+            list[str]: List of monster names.
+        """
+        return list(self.__monsters.keys())
 
     def get(self, monster: str) -> Monster:
-        return self._monsters[monster]
+        """Get/Summon the monster by name.
+
+        Args:
+            monster (str): Monster name.
+
+        Raises:
+            NameError: No monster found.
+
+        Returns:
+            Monster: A monster object.
+        """
+        if monster in self.__monsters:
+            return Monster(
+                name=monster, **self.__monsters[monster]
+            )
+
+        raise NameError(f"Monster not found; {monster}")
