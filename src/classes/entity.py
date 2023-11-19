@@ -69,7 +69,7 @@ class Entity:
         """Applied one tick of combat state. (Poison, Mana regen, etc.)
         """
         # Increase mana by 1 every turns
-        self.stats.mana.increase(1, self.stats.get('mana_max'))
+        self.stats.mana.increase(1, self.stats.get('max_mana'))
 
         for index, poison in enumerate(self._poisons):
             # Take effect

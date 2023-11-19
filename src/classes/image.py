@@ -1,3 +1,5 @@
+import os.path
+
 
 class Image:
     def __init__(self) -> None:
@@ -17,4 +19,7 @@ class Image:
         return self._bimages[__name]
 
     def __setitem__(self, __name: str, __value: str) -> None:
+        if not os.path.isfile(__value):
+            raise FileNotFoundError(f"Couldn't find {__value}")
+
         self._images[__name] = __value
