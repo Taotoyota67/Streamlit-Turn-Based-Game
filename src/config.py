@@ -124,7 +124,7 @@ MONSTERS = {
             "dead": "assets/monsters/huntress_dead.png"
         }
     },
-    "Scalet Witch": {
+    "Scarlet Witch": {
         "health": 20,
         "damage": 5,
         "moves": {
@@ -211,7 +211,7 @@ MONSTERS = {
             "dead": "assets/monsters/black_knight_dead.png"
         }
     },
-    "Samurai": {
+    "Samurize": {
         "health": 14,
         "damage": 8,
         "moves": {
