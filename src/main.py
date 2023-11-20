@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 
 from accounts import Accounts, AccountAlreadyExists
@@ -21,6 +22,8 @@ username = sess.gset("username", "")
 password = sess.gset("password", "")
 login_status = sess.gset("login_status", True)
 game = sess.gset("game", Game("admin"))
+player = sess.gset("player", game.player)
+MoveType = game.enums.MoveType
 
 
 if "page" not in st.session_state:
@@ -169,6 +172,7 @@ def login():
 
 
 def choosing_status():
+    global player, MoveType
     sess.gset("choose", "unknown")
     sess.gset("anable_confirm", False)
     sess.gset("confirm", False)
@@ -176,11 +180,11 @@ def choosing_status():
     col1, col2 = st.columns([0.7, 0.3], gap="large")
     col1.title(":blue[Choose your status]")
 
-    def write_status(hp, mana, atk, heal):
+    def write_status(hp, mana, atk):
         col2.title(" ")
 
-        status = {'Status': ['HP', "MANA", "ATK", "HEAL"],
-                  'amount': [hp, mana, atk, heal]}
+        status = {'Status': ['HP', "MANA", "ATK"],
+                  'amount': [hp, mana, atk]}
         d_hp = pd.DataFrame(status)
         my_chart = alt.Chart(d_hp).mark_bar().encode(
             x="Status",
@@ -193,7 +197,6 @@ def choosing_status():
         col2.write(f"HP: {hp}")
         col2.write(f"MANA: {mana}")
         col2.write(f"ATK: {atk}")
-        col2.write(f"HEAL: {heal}")
 
     def write_skills():
         col2.subheader(":blue[Chosen Skills]")
@@ -235,18 +238,182 @@ def choosing_status():
     # Write status after clicking button
     if sess["choose"] != "unknown":
         if sess["choose"] == "1st":
-            write_status(100, 100, 10, 10)
-            # sess.gset("player", Player(100, 10, 10, 100))
+            write_status(100, 100, 5)
+            player.stats.max_health.set(100)
+            player.stats.health.set(100)
+            player.stats.max_mana.set(100)
+            player.stats.mana.set(100)
+            player.stats.damage.set(5)
         elif sess["choose"] == "2nd":
-            write_status(150, 50, 20, 5)
-            # sess.gset("player", Player(150, 20, 5, 50))
+            write_status(150, 50, 7)
+            player.stats.max_health.set(150)
+            player.stats.health.set(150)
+            player.stats.max_mana.set(50)
+            player.stats.mana.set(50)
+            player.stats.damage.set(7)
         elif sess["choose"] == "3rd":
-            write_status(50, 150, 20, 20)
-            # sess.gset("player", Player(50, 20, 20, 150))
+            write_status(50, 150, 7)
+            player.stats.max_health.set(50)
+            player.stats.health.set(50)
+            player.stats.max_mana.set(150)
+            player.stats.mana.set(150)
+            player.stats.damage.set(7)
 
-    # Write skills after clicking confirm
+    # Write skills after clicking confirm and anable "NEXT" button
     if sess["confirm"]:
         write_skills()
+        if "DAMAGE BUFF" in sess["skills_list"]:
+            player.skills.grant(MoveType.DAMAGE_BUFF)
+        if "HEAL" in sess["skills_list"]:
+            player.skills.grant(MoveType.HEAL)
+        if "POISON" in sess["skills_list"]:
+            player.skills.grant(MoveType.POISON)
+        if "LIFE STEAL" in sess["skills_list"]:
+            player.skills.grant(MoveType.LIFE_STEAL)
+        if "STUN" in sess["skills_list"]:
+            player.skills.grant(MoveType.STUN)
+        col1.button("NEXT", on_click=change_page, args=("fight",))
+
+
+def fight():
+    global player, MoveType
+    round = sess.gset("round", 1)
+    all_mon_list = sess.gset("mon_list", game.monsters.get_all_names())
+    boss_list = ["The Gatekeeper", "The Soul Collector", "The Corrupted",
+                 "The Rhinoceros", "The Dark Wizard", "The Inferno"]
+    mon_list = [name for name in all_mon_list if name not in boss_list]
+    # st.write(mon_list)
+    if round in [5, 11, 17]:
+        monster = sess.gset(
+            "monster", game.get_monster(random.choice(boss_list)))
+    else:
+        monster = sess.gset(
+            "monster", game.get_monster(random.choice(mon_list)))
+    sess.gset("press_hit_skill", False)
+
+    # Set up webpage, load CSS
+    st.set_page_config(layout="wide")  # type: ignore
+
+    col1, col2 = st.columns([2, 4])
+
+    # Disable weird shits using css
+    with open('mylifesad.css') as f:
+        hide_img_fs = f"<style>{f.read()}</style>"
+
+    st.markdown(hide_img_fs, unsafe_allow_html=True)
+
+    # Set up player
+    player.tick()
+    # Player display
+    col1.title(":blue[Journey of Momo]")
+    chart_empty = col1.empty()
+
+    def update_player_status_chart():
+        status = {
+            'Status': ['HP', "MANA"],
+            'amount': [player.stats.health.get(), player.stats.mana.get()]
+        }
+        d_hp = pd.DataFrame(status)
+        my_chart = alt.Chart(d_hp).mark_bar().encode(
+            x="Status",
+            y=alt.X("amount", scale=alt.Scale(
+                domain=[0, max(player.stats.max_health.get(), player.stats.max_mana.get())]))
+        ).properties(width=200)
+        chart_empty.altair_chart(my_chart)
+
+    update_player_status_chart()
+
+    # Disable player button if...
+    def dis_but():
+        if player.is_stun() or sess["press_hit_skill"]:
+            return True
+        else:
+            return False
+
+    # Hit button
+    if col1.button("Hit", disabled=dis_but()):
+        sess["press_hit_skill"] = True
+        player.make_move(MoveType.ATTACK, monster)
+        st.rerun()
+
+    # Skill buttons
+    if "DAMAGE BUFF" in sess["skills_list"]:
+        if col1.button("DAMAGE BUFF", disabled=dis_but()):
+            sess["press_hit_skill"] = True
+            player.make_move(MoveType.DAMAGE_BUFF, monster)
+            st.rerun()
+    if "HEAL" in sess["skills_list"]:
+        if col1.button("HEAL", disabled=dis_but()):
+            sess["press_hit_skill"] = True
+            player.make_move(MoveType.HEAL, player)
+            st.rerun()
+    if "POISON" in sess["skills_list"]:
+        if col1.button("POISON", disabled=dis_but()):
+            sess["press_hit_skill"] = True
+            player.make_move(MoveType.POISON, monster)
+            st.rerun()
+    if "LIFE STEAL" in sess["skills_list"]:
+        if col1.button("LIFE STEAL", disabled=dis_but()):
+            sess["press_hit_skill"] = True
+            player.make_move(MoveType.LIFE_STEAL, monster)
+            st.rerun()
+    if "STUN" in sess["skills_list"]:
+        if col1.button("STUN", disabled=dis_but()):
+            sess["press_hit_skill"] = True
+            player.make_move(MoveType.STUN, monster)
+            st.rerun()
+
+    # Set up monster
+    monster.tick()
+    # Monster display
+    if monster.name in boss_list:
+        col2.title(f":red[{monster.name}]")
+    else:
+        col2.title(f":blue[{monster.name}]")
+
+    def update_monster_status_chart():
+        mon_hp = {
+            'Status': ['HP'],
+            'amount': [monster.stats.health.get()]
+        }
+        d_mon_hp = pd.DataFrame(mon_hp)
+        mon_chart = alt.Chart(d_mon_hp).mark_bar().encode(
+            x=alt.X("amount", scale=alt.Scale(
+                domain=[0, monster.stats.max_health.get()])),
+            y="Status"
+        ).properties(height=105, width=500)
+        col2.altair_chart(mon_chart)
+
+    update_monster_status_chart()
+    col2.image(monster.image, width=450)
+
+    # Monster make move
+    if player.is_stun() or sess["press_hit_skill"]:
+        if monster.is_alive() and not monster.is_stun():
+            mon_move = monster.random_move()
+            if mon_move == MoveType.HEAL:
+                mon_move_amount = monster.make_move(mon_move, monster)
+                # just testing text
+                col2.write(
+                    f"{monster.name} did {mon_move} for {mon_move_amount}")
+                time.sleep(3)
+                sess["press_hit_skill"] = False
+
+            else:
+                mon_move_amount = monster.make_move(mon_move, player)
+                # just testing text
+                col2.write(
+                    f"{monster.name} did {mon_move} for {mon_move_amount}")
+                time.sleep(3)
+                sess["press_hit_skill"] = False
+
+        elif monster.is_stun():
+            # just testing text
+            col2.write(f"{monster.name} is stun")
+            time.sleep(3)
+            sess["press_hit_skill"] = False
+
+        st.rerun()
 
 
 pages = {
@@ -256,7 +423,8 @@ pages = {
     "create_account": create_account,
     "login_page": login_page,
     "login": login,
-    "choosing_status": choosing_status
+    "choosing_status": choosing_status,
+    "fight": fight
 }
 
 
