@@ -338,27 +338,27 @@ def fight():
 
     # Skill buttons
     if "DAMAGE BUFF" in sess["skills_list"]:
-        if col1.button("DAMAGE BUFF", disabled=dis_but()):
+        if col1.button("DAMAGE BUFF", disabled=dis_but() or not player.skills.can_use(MoveType.DAMAGE_BUFF)):
             sess["press_hit_skill"] = True
             player.make_move(MoveType.DAMAGE_BUFF, monster)
             st.rerun()
     if "HEAL" in sess["skills_list"]:
-        if col1.button("HEAL", disabled=dis_but()):
+        if col1.button("HEAL", disabled=dis_but() or not player.skills.can_use(MoveType.HEAL)):
             sess["press_hit_skill"] = True
             player.make_move(MoveType.HEAL, player)
             st.rerun()
     if "POISON" in sess["skills_list"]:
-        if col1.button("POISON", disabled=dis_but()):
+        if col1.button("POISON", disabled=dis_but() or not player.skills.can_use(MoveType.POISON)):
             sess["press_hit_skill"] = True
             player.make_move(MoveType.POISON, monster)
             st.rerun()
     if "LIFE STEAL" in sess["skills_list"]:
-        if col1.button("LIFE STEAL", disabled=dis_but()):
+        if col1.button("LIFE STEAL", disabled=dis_but() or not player.skills.can_use(MoveType.LIFE_STEAL)):
             sess["press_hit_skill"] = True
             player.make_move(MoveType.LIFE_STEAL, monster)
             st.rerun()
     if "STUN" in sess["skills_list"]:
-        if col1.button("STUN", disabled=dis_but()):
+        if col1.button("STUN", disabled=dis_but() or not player.skills.can_use(MoveType.STUN)):
             sess["press_hit_skill"] = True
             player.make_move(MoveType.STUN, monster)
             st.rerun()
@@ -401,7 +401,7 @@ def fight():
                 st.rerun()
 
             else:
-                mon_move_amount = monster.make_move(mon_move, player)
+                mon_move_amount = monster.make_move(mon_move, player.entity)
                 # just testing text
                 col2.write(
                     f"{monster.name} did {mon_move} for {mon_move_amount}")
