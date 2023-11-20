@@ -398,6 +398,7 @@ def fight():
                     f"{monster.name} did {mon_move} for {mon_move_amount}")
                 time.sleep(3)
                 sess["press_hit_skill"] = False
+                st.rerun()
 
             else:
                 mon_move_amount = monster.make_move(mon_move, player)
@@ -406,14 +407,14 @@ def fight():
                     f"{monster.name} did {mon_move} for {mon_move_amount}")
                 time.sleep(3)
                 sess["press_hit_skill"] = False
+                st.rerun()
 
         elif monster.is_stun():
             # just testing text
             col2.write(f"{monster.name} is stun")
             time.sleep(3)
             sess["press_hit_skill"] = False
-
-        st.rerun()
+            st.rerun()
 
 
 pages = {
