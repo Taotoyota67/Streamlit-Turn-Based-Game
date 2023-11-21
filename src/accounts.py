@@ -4,7 +4,7 @@ import uuid
 from db import db
 
 
-def hash_sha256(text: str, salt: str) -> str:
+def hash_sha512(text: str, salt: str) -> str:
     return hashlib.sha512(bytes(text + salt, 'utf-8')).hexdigest()
 
 
@@ -14,10 +14,6 @@ def generate_salt() -> str:
 
 class AccountAlreadyExists(Exception):
     """Account already exists"""
-
-
-class AccountNotExists(Exception):
-    """Account not exists"""
 
 
 class Accounts:
@@ -36,10 +32,10 @@ class Accounts:
         4. Not already exists.
 
         Args:
-            username (str): username to check.
+            username (str): Username to check.
 
         Returns:
-            bool: username is valid.
+            bool: Username is valid.
         """
         return (
             username.isspace() or
@@ -54,10 +50,10 @@ class Accounts:
         """Check if username already exists or not.
 
         Args:
-            username (str): username.
+            username (str): Username.
 
         Returns:
-            bool: username exists.
+            bool: Username exists.
         """
         return username.lower() in db["accounts"]
 
@@ -65,18 +61,18 @@ class Accounts:
         """Add account to accounts system.
 
         Args:
-            username (str): username
-            password (str): password
+            username (str): Username.
+            password (str): Password.
 
         Raises:
-            AccountAlreadyExists: when account already exists
+            AccountAlreadyExists: Account already exists.
         """
         if self.has(username):  # Just making sure.
             raise AccountAlreadyExists
 
         salt = generate_salt()
 
-        db["accounts"][username.lower()] = [hash_sha256(password, salt), salt]
+        db["accounts"][username.lower()] = [hash_sha512(password, salt), salt]
         db.save()
 
     def login(self, username: str, password: str) -> bool:
@@ -84,8 +80,8 @@ class Accounts:
         *WARNING* not a good implementation of login system.
 
         Args:
-            username (str): username
-            password (str): password
+            username (str): Username.
+            password (str): Password.
 
         Returns:
             bool: login success.
@@ -95,4 +91,4 @@ class Accounts:
 
         password_hash, salt = db["accounts"][username.lower()]
 
-        return password_hash == hash_sha256(password, salt)
+        return password_hash == hash_sha512(password, salt)
