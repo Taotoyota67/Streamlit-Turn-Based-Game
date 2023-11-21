@@ -273,7 +273,13 @@ def choosing_status():
             player.skills.grant(MoveType.LIFE_STEAL)
         if "STUN" in sess["skills_list"]:
             player.skills.grant(MoveType.STUN)
-        col1.button("NEXT", on_click=change_page, args=("fight",))
+
+        if col1.button("NEXT"):
+            del st.session_state["choose"]
+            del st.session_state["confirm"]
+            del st.session_state["anable_confirm"]
+            change_page("fight")
+            st.rerun()
 
 
 def fight():
@@ -284,6 +290,7 @@ def fight():
                  "The Rhinoceros", "The Dark Wizard", "The Inferno"]
     mon_list = [name for name in all_mon_list if name not in boss_list]
     sess.gset("pass_mon_turn", True)
+    sess.gset("press_hit_skill", False)
 
     # Choosing between MONSTER and BOSS
     if room in [5, 11, 17]:
@@ -292,7 +299,6 @@ def fight():
     else:
         monster = sess.gset(
             "monster", game.get_monster(random.choice(mon_list)))
-    sess.gset("press_hit_skill", False)
 
     # Set up webpage, load CSS
     st.set_page_config(layout="wide")  # type: ignore
@@ -368,8 +374,20 @@ def fight():
         sleep(2)
         empty.empty()
 
+    # Cheat button
+    if st.sidebar.button("CHEAT", disabled=dis_but(), on_click=not_pass_mon):
+        sess["press_hit_skill"] = True
+        # player_move_amount = player.make_move(MoveType.ATTACK, monster)
+        # # Animate text
+        # write_text(player_text, f"Dealing DAMAGE for {player_move_amount}.",
+        #            "\"Whatever it takes... keep moving\"", 1, 1.5)
+
+        # player.make_move(MoveType.ATTACK, monster)
+        player.entity.attack(monster, 1000)
+        st.rerun()
+
     # Hit button
-    if col1.button("Hit", disabled=dis_but(), on_click=not_pass_mon):
+    if col1.button("HIT", disabled=dis_but(), on_click=not_pass_mon):
         sess["press_hit_skill"] = True
         player_move_amount = player.make_move(MoveType.ATTACK, monster)
         # Animate text
@@ -430,7 +448,7 @@ def fight():
             st.rerun()
 
     # Set up monster
-    if player.is_stun() or sess["press_hit_skill"]:
+    if (player.is_stun() or sess["press_hit_skill"]) and monster.is_alive():
         monster.tick()
     # Monster display
     if monster.name in boss_list:
@@ -517,6 +535,82 @@ def fight():
             sess["pass_mon_turn"] = True
             st.rerun()
 
+    # if monster is not alive
+    if not monster.is_alive():
+        if col1.button("NEXT"):
+            sess["press_hit_skill"] = False
+            sess["room"] += 1
+            sess["all_mon_list"].remove(monster.name)
+            del st.session_state["monster"]
+
+            if sess["room"] in [3, 6, 9, 12, 15, 18]:
+                change_page("buff")
+            st.rerun()
+
+
+def buff():
+    sess.gset("choose", "unknown")
+    sess.gset("anable_confirm", False)
+    sess.gset("confirm", False)
+    max_hp = player.stats.max_health.get()
+    max_mana = player.stats.max_mana.get()
+    atk = player.stats.damage.get()
+    col1, col2 = st.columns([0.7, 0.3], gap="large")
+    col1.title(":blue[Choose your BUFF]")
+
+    def write_buff(hp, mana, atk):
+        col2.title(" ")
+
+        status = {'Status': ['HP', "MANA", "ATK"],
+                  'amount': [hp, mana, atk]}
+        d_hp = pd.DataFrame(status)
+        my_chart = alt.Chart(d_hp).mark_bar().encode(
+            x="Status",
+            y=alt.X("amount", scale=alt.Scale(domain=[0, 150]))
+        ).properties(width=200)
+
+        col2.altair_chart(my_chart)
+        col2.subheader(":blue[Chosen Status]")
+
+        col2.write(f"HP: {hp}")
+        col2.write(f"MANA: {mana}")
+        col2.write(f"ATK: {atk}")
+
+    if col1.button("MAX HP + 10", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "MAX HP + 10"
+        sess["anable_confirm"] = True
+        write_buff(max_hp+10, max_mana, atk)
+    if col1.button("MAX MANA + 10", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "MANA + 10"
+        sess["anable_confirm"] = True
+        write_buff(max_hp, max_mana+10, atk)
+    if col1.button("ATK + 5", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = "ATK + 5"
+        sess["anable_confirm"] = True
+        write_buff(max_hp, max_mana, atk+5)
+
+    if col1.button("CONFIRM", disabled=not sess["anable_confirm"] or sess["confirm"]):
+        sess["confirm"] = True
+        st.rerun()
+
+    if sess["confirm"]:
+        if sess["choose"] == "MAX HP + 10":
+            player.stats.max_health.increase(10)
+        elif sess["choose"] == "MANA + 10":
+            player.stats.max_mana.increase(10)
+        elif sess["choose"] == "ATK + 5":
+            player.stats.damage.increase(5)
+
+        write_buff(max_hp, max_mana, atk)
+
+        if col1.button("NEXT"):
+            sess["room"] += 1
+            del st.session_state["choose"]
+            del st.session_state["confirm"]
+            del st.session_state["anable_confirm"]
+            change_page("fight")
+            st.rerun()
+
 
 pages = {
     "main_page": main_page,
@@ -526,7 +620,8 @@ pages = {
     "login_page": login_page,
     "login": login,
     "choosing_status": choosing_status,
-    "fight": fight
+    "fight": fight,
+    "buff": buff
 }
 
 
