@@ -9,7 +9,7 @@ from classes.stats import Stats
 class Player:
     def __init__(self, username: str) -> None:
         self.username = username
-        self.stats = Stats(**config.PLAYER_DEFAULT_STATS)
+        self.stats = Stats()
         self.entity = Entity(stats=self.stats, is_player=True)
         self.skills = PlayerSkill(self.stats)
 

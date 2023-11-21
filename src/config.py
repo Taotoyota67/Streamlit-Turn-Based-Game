@@ -423,12 +423,6 @@ MONSTERS = {
     }
 }
 
-PLAYER_DEFAULT_STATS = {
-    "damage": 4,
-    "health": 30,
-    "mana": 20,
-}
-
 # Mana cost for every moves.
 PLAYER_MOVE_COSTS = {
     "attack": 0,
