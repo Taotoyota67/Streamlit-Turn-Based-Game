@@ -4,6 +4,7 @@ import streamlit as st
 from accounts import Accounts, AccountAlreadyExists
 from game import Game
 from utils.layout import setup_page
+from utils.animate import animate_text
 
 # My import
 
@@ -277,13 +278,15 @@ def choosing_status():
 
 def fight():
     global player, MoveType
-    round = sess.gset("round", 1)
-    all_mon_list = sess.gset("mon_list", game.monsters.get_all_names())
+    room = sess.gset("room", 1)
+    all_mon_list = sess.gset("all_mon_list", game.monsters.get_all_names())
     boss_list = ["The Gatekeeper", "The Soul Collector", "The Corrupted",
                  "The Rhinoceros", "The Dark Wizard", "The Inferno"]
     mon_list = [name for name in all_mon_list if name not in boss_list]
-    # st.write(mon_list)
-    if round in [5, 11, 17]:
+    sess.gset("pass_mon_turn", True)
+
+    # Choosing between MONSTER and BOSS
+    if room in [5, 11, 17]:
         monster = sess.gset(
             "monster", game.get_monster(random.choice(boss_list)))
     else:
@@ -301,18 +304,34 @@ def fight():
         hide_img_fs = f"<style>{f.read()}</style>"
 
     st.markdown(hide_img_fs, unsafe_allow_html=True)
+    # sess.gset("setup_page", setup_page(st))
 
     # Set up player
-    player.tick()
+    if sess["pass_mon_turn"]:
+        player.tick()
     # Player display
-    col1.title(":blue[Journey of Momo]")
+    if room in [1, 2, 3, 4, 5, 6]:
+        floor = 1
+    elif room in [7, 8, 9, 10, 11, 12]:
+        floor = 2
+    else:
+        floor = 3
+
+    col1.title(f":blue[FLOOR {floor} | ROOM {room}]")
     chart_empty = col1.empty()
 
     def update_player_status_chart():
-        status = {
-            'Status': ['HP', "MANA"],
-            'amount': [player.stats.health.get(), player.stats.mana.get()]
-        }
+        if player.is_alive():
+            status = {
+                'Status': ['HP', "MANA"],
+                'amount': [player.stats.health.get(), player.stats.mana.get()]
+            }
+        else:
+            status = {
+                'Status': ['HP', "MANA"],
+                'amount': [0, player.stats.mana.get()]
+            }
+
         d_hp = pd.DataFrame(status)
         my_chart = alt.Chart(d_hp).mark_bar().encode(
             x="Status",
@@ -330,41 +349,89 @@ def fight():
         else:
             return False
 
+    # Still don't pass monster turn
+    def not_pass_mon():
+        sess["pass_mon_turn"] = False
+
+    # Player text empty
+    player_text = col1.empty()
+
+    # Animate text
+    def write_text(empty, move_text: str, talk_text: str, move_text_time: float, talk_text_time: float):
+        animate_text(empty, move_text, time_per_sentence=move_text_time)
+        sleep(2)
+        animate_text(
+            empty,
+            talk_text,
+            time_per_sentence=talk_text_time
+        )
+        sleep(2)
+        empty.empty()
+
     # Hit button
-    if col1.button("Hit", disabled=dis_but()):
+    if col1.button("Hit", disabled=dis_but(), on_click=not_pass_mon):
         sess["press_hit_skill"] = True
+        player_move_amount = player.make_move(MoveType.ATTACK, monster)
+        # Animate text
+        write_text(player_text, f"Dealing DAMAGE for {player_move_amount}.",
+                   "\"Whatever it takes... keep moving\"", 1, 1.5)
+
         player.make_move(MoveType.ATTACK, monster)
         st.rerun()
 
     # Skill buttons
     if "DAMAGE BUFF" in sess["skills_list"]:
-        if col1.button("DAMAGE BUFF", disabled=dis_but() or not player.skills.can_use(MoveType.DAMAGE_BUFF)):
+        if col1.button("DAMAGE BUFF", disabled=dis_but() or not player.skills.can_use(MoveType.DAMAGE_BUFF),  on_click=not_pass_mon):
             sess["press_hit_skill"] = True
-            player.make_move(MoveType.DAMAGE_BUFF, monster)
+            player_move_amount = player.make_move(
+                MoveType.DAMAGE_BUFF, monster)
+
+            # Animate text
+            write_text(player_text, f"Your DAMAGE increase to {player_move_amount}",
+                       "\"The strength for the mighty one\"", 1, 1.5)
+
             st.rerun()
     if "HEAL" in sess["skills_list"]:
-        if col1.button("HEAL", disabled=dis_but() or not player.skills.can_use(MoveType.HEAL)):
+        if col1.button("HEAL", disabled=dis_but() or not player.skills.can_use(MoveType.HEAL), on_click=not_pass_mon):
             sess["press_hit_skill"] = True
-            player.make_move(MoveType.HEAL, player)
+            player_move_amount = player.make_move(MoveType.HEAL, monster)
+
+            # Animate text
+            write_text(player_text, f"You are healing... increasing HP for {player_move_amount}",
+                       "\"There is something you need to do right?\"", 1, 1.5)
             st.rerun()
     if "POISON" in sess["skills_list"]:
-        if col1.button("POISON", disabled=dis_but() or not player.skills.can_use(MoveType.POISON)):
+        if col1.button("POISON", disabled=dis_but() or not player.skills.can_use(MoveType.POISON), on_click=not_pass_mon):
             sess["press_hit_skill"] = True
-            player.make_move(MoveType.POISON, monster)
+            player_move_amount = player.make_move(MoveType.POISON, monster)
+
+            # Animate text
+            write_text(player_text, f"You used POISON... {monster.name} will take damage over time for {player_move_amount}.",
+                       "\"A gradual decay... The inevitable plight of mortal\"", 1.5, 1.5)
             st.rerun()
     if "LIFE STEAL" in sess["skills_list"]:
-        if col1.button("LIFE STEAL", disabled=dis_but() or not player.skills.can_use(MoveType.LIFE_STEAL)):
+        if col1.button("LIFE STEAL", disabled=dis_but() or not player.skills.can_use(MoveType.LIFE_STEAL), on_click=not_pass_mon):
             sess["press_hit_skill"] = True
-            player.make_move(MoveType.LIFE_STEAL, monster)
+            player_move_amount = player.make_move(MoveType.LIFE_STEAL, monster)
+
+            # Animate text
+            write_text(player_text, f"You used LIFE STEAL... decrease {monster.name} HP to increase yours for {player_move_amount}.",
+                       "\"A valuable source of life... don't let anyone take it from you\"", 1.5, 1.5)
             st.rerun()
     if "STUN" in sess["skills_list"]:
-        if col1.button("STUN", disabled=dis_but() or not player.skills.can_use(MoveType.STUN)):
+        if col1.button("STUN", disabled=dis_but() or not player.skills.can_use(MoveType.STUN), on_click=not_pass_mon):
             sess["press_hit_skill"] = True
-            player.make_move(MoveType.STUN, monster)
+            player_move_amount = player.make_move(MoveType.STUN, monster)
+
+            # Animate text
+            write_text(player_text, f"You used STUN... {monster.name} will be incapable for 1 round",
+                       "\"A little rest won't hurt.\"", 1, 1)
+
             st.rerun()
 
     # Set up monster
-    monster.tick()
+    if player.is_stun() or sess["press_hit_skill"]:
+        monster.tick()
     # Monster display
     if monster.name in boss_list:
         col2.title(f":red[{monster.name}]")
@@ -372,10 +439,17 @@ def fight():
         col2.title(f":blue[{monster.name}]")
 
     def update_monster_status_chart():
-        mon_hp = {
-            'Status': ['HP'],
-            'amount': [monster.stats.health.get()]
-        }
+        if monster.is_alive():
+            mon_hp = {
+                'Status': ['HP'],
+                'amount': [monster.stats.health.get()]
+            }
+        else:
+            mon_hp = {
+                'Status': ['HP'],
+                'amount': [0]
+            }
+
         d_mon_hp = pd.DataFrame(mon_hp)
         mon_chart = alt.Chart(d_mon_hp).mark_bar().encode(
             x=alt.X("amount", scale=alt.Scale(
@@ -385,35 +459,62 @@ def fight():
         col2.altair_chart(mon_chart)
 
     update_monster_status_chart()
-    col2.image(monster.image, width=450)
+    col2.image(monster.image, width=1000)
+    mon_text = col2.empty()
 
     # Monster make move
     if player.is_stun() or sess["press_hit_skill"]:
-        if monster.is_alive() and not monster.is_stun():
-            mon_move = monster.random_move()
-            if mon_move == MoveType.HEAL:
-                mon_move_amount = monster.make_move(mon_move, monster)
-                # just testing text
-                col2.write(
-                    f"{monster.name} did {mon_move} for {mon_move_amount}")
-                time.sleep(3)
-                sess["press_hit_skill"] = False
-                st.rerun()
+        if monster.is_stun():
+            # # just testing text
+            # col2.write(f"{monster.name} is stun")
+            # time.sleep(3)
+            # Animate text
+            write_text(mon_text, f"{monster.name} is STUNNED.",
+                       monster.text.get("got_attack"), 1, 1.5)
 
-            else:
-                mon_move_amount = monster.make_move(mon_move, player.entity)
-                # just testing text
-                col2.write(
-                    f"{monster.name} did {mon_move} for {mon_move_amount}")
-                time.sleep(3)
-                sess["press_hit_skill"] = False
-                st.rerun()
-
-        elif monster.is_stun():
-            # just testing text
-            col2.write(f"{monster.name} is stun")
             time.sleep(3)
+            # update_monster_status_chart()
             sess["press_hit_skill"] = False
+            sess["pass_mon_turn"] = True
+            st.rerun()
+
+        # If monster is not stunned and alive
+        elif monster.is_alive():
+            mon_move = monster.random_move()
+            mon_move_amount = monster.make_move(mon_move, player.entity)
+            # # just testing text
+            # col2.write(
+            #     f"{monster.name} did {mon_move} for {mon_move_amount}")
+            # time.sleep(3)
+            # sess["press_hit_skill"] = False
+
+            # Animate text
+            if mon_move == MoveType.ATTACK:
+                write_text(mon_text, f"{monster.name} is dealing DAMAGE for {mon_move_amount}.",
+                           monster.text.get("got_attack"), 1, 1.5)
+            elif mon_move == MoveType.DAMAGE_BUFF:
+                write_text(mon_text, f"{monster.name} DAMAGE increase to {mon_move_amount}",
+                           monster.text.get("do_damage_buff"), 1, 1.5)
+            elif mon_move == MoveType.HEAL:
+                write_text(mon_text, f"{monster.name} is healing... increasing its HP for {mon_move_amount}",
+                           monster.text.get("do_heal"), 1, 1.5)
+            elif mon_move == MoveType.POISON:
+                write_text(mon_text, f"{monster.name} used POISON... PLAYER will take damage over time for {mon_move_amount}.",
+                           monster.text.get("do_poison"), 1, 1.5)
+            elif mon_move == MoveType.LIFE_STEAL:
+                write_text(mon_text, f"{monster.name} used LIFE STEAL... decrease PLAYER HP to increase its for {mon_move_amount}.",
+                           monster.text.get("do_life_steal"), 1, 1.5)
+            elif mon_move == MoveType.STUN:
+                write_text(mon_text, f"{monster.name} used STUN... PLAYER will be incapable for 1 round",
+                           monster.text.get("do_stun"), 1, 1.5)
+            elif mon_move == MoveType.MANA_DRAIN:
+                write_text(mon_text, f"{monster.name} drained PLAYER MANA for {mon_move_amount}.",
+                           monster.text.get("do_mana_drain"), 1, 1.5)
+
+            time.sleep(3)
+            # update_monster_status_chart()
+            sess["press_hit_skill"] = False
+            sess["pass_mon_turn"] = True
             st.rerun()
 
 
