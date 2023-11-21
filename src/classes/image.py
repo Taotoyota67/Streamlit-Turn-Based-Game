@@ -1,4 +1,5 @@
 import os.path
+from io import BytesIO
 
 
 class Image:
@@ -6,7 +7,7 @@ class Image:
         self._images = {}
         self._bimages = {}
 
-    def __getitem__(self, __name: str) -> bytes:
+    def __getitem__(self, __name: str) -> BytesIO:
         if __name not in self._images:
             raise KeyError(f"Image named {__name}; not found.")
 

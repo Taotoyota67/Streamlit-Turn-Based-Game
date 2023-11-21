@@ -1,4 +1,5 @@
 import random
+from io import BytesIO
 from typing import Dict
 
 import config
@@ -24,7 +25,7 @@ class Monster(Entity):
         self._image["dead"] = image["dead"]
 
     @property
-    def image(self) -> bytes:
+    def image(self) -> BytesIO:
         return self._image["alive"] if self.is_alive() else self._image["dead"]
 
     def serialize(self) -> dict:
