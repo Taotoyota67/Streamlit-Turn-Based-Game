@@ -7,9 +7,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/swordman.png",
@@ -24,9 +24,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/spearwomen.png",
@@ -42,10 +42,10 @@ MONSTERS = {
             "damage_buff": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/ghost.png",
@@ -61,10 +61,10 @@ MONSTERS = {
             "mana_drain": 30
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_poison": [],
-            "do_mana_drain": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_poison": ["SOME TEXT"],
+            "do_mana_drain": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/thresh.png",
@@ -80,10 +80,10 @@ MONSTERS = {
             "mana_drain": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": [],
-            "do_mana_drain": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"],
+            "do_mana_drain": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/ghost_warrior.png",
@@ -98,9 +98,9 @@ MONSTERS = {
             "poison": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_poison": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_poison": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/arachne.png",
@@ -115,9 +115,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/huntress.png",
@@ -132,9 +132,9 @@ MONSTERS = {
             "stun": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_stun": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_stun": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/young_witch.png",
@@ -150,10 +150,10 @@ MONSTERS = {
             "heal": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_stun": [],
-            "do_heal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_stun": ["SOME TEXT"],
+            "do_heal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/rino.png",
@@ -168,9 +168,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/golem.png",
@@ -185,9 +185,9 @@ MONSTERS = {
             "stun": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_stun": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_stun": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/woman_knight.png",
@@ -202,9 +202,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/black_knight.png",
@@ -219,9 +219,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/wanderer.png",
@@ -236,9 +236,9 @@ MONSTERS = {
             "life_steal": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/samurai.png",
@@ -253,9 +253,9 @@ MONSTERS = {
             "life_steal": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/void_eye_ball.png",
@@ -270,9 +270,9 @@ MONSTERS = {
             "life_steal": 40
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/reaper.png",
@@ -287,9 +287,9 @@ MONSTERS = {
             "heal": 40
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_heal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_heal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/void_human.png",
@@ -304,9 +304,9 @@ MONSTERS = {
             "heal": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_heal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_heal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/zombie.png",
@@ -321,9 +321,9 @@ MONSTERS = {
             "heal": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_heal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_heal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/lich_warrior.png",
@@ -340,11 +340,11 @@ MONSTERS = {
             "life_steal": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_poison": [],
-            "do_stun": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_poison": ["SOME TEXT"],
+            "do_stun": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/wizard.png",
@@ -359,9 +359,9 @@ MONSTERS = {
             "poison": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_poison": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_poison": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/fire_worm.png",
@@ -376,9 +376,9 @@ MONSTERS = {
             "life_steal": 20
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_life_steal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_life_steal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/humungousaur.png",  # who tf name this.
@@ -393,9 +393,9 @@ MONSTERS = {
             "damage_buff": 25
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_damage_buff": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_damage_buff": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/guardian.png",
@@ -411,10 +411,10 @@ MONSTERS = {
             "heal": 15
         },
         "texts": {
-            "do_attack": [],
-            "got_attack": [],
-            "do_poison": [],
-            "do_heal": []
+            "do_attack": ["SOME TEXT"],
+            "got_attack": ["SOME TEXT"],
+            "do_poison": ["SOME TEXT"],
+            "do_heal": ["SOME TEXT"]
         },
         "image": {
             "alive": "assets/monsters/fire_demon.png",
