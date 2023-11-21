@@ -174,9 +174,9 @@ class Entity:
             ret = int(max_health * self.get_heal_multiplier())
             self.stats.health.increase(ret, self.stats.get("max_health"))
         elif move == MoveType.POISON:
-            self.add_poison(
-                config.PLAYER_POISON_DURATION,
-                config.PLAYER_POISON_MULTIPLIER
+            target.add_poison(
+                config.POISON_DURATION,
+                config.POISON_MULTIPLIER
             )
             ret = 1
         elif move == MoveType.LIFE_STEAL:
@@ -192,7 +192,7 @@ class Entity:
         elif move == MoveType.MANA_DRAIN:
             mana_amount = int(target.stats.get("max_mana") *
                               config.MONSTER_MANA_DRAIN_MULTIPLIER)
-            target.stats.mana.reduce(mana_amount)
+            target.stats.mana.reduce(mana_amount, 0)
             ret = mana_amount
         else:
             raise InvalidMove
