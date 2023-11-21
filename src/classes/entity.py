@@ -2,7 +2,7 @@ from typing import Optional, TypeVar
 
 import config
 from classes.enums import MoveType
-from classes.errors import CannotMakeMove, InvalidMove
+from classes.errors import CannotMove, InvalidMove, AlreadyDead
 from classes.skills import Poison
 from classes.stats import Stats
 from classes.text import EntityText
@@ -64,8 +64,16 @@ class Entity:
         return bool(self._poisons)
 
     def tick(self) -> None:
-        """Applied one tick of combat state. (Poison, Mana regen, etc.)
+        """Applied a tick of combat state. (Poison, Mana regen, etc.)
+
+        Raises:
+            AlreadyDead: This entity is ALREADY DEAD.
         """
+        if not self.is_alive():
+            raise AlreadyDead(
+                "This entity is already dead. Did you forget to check by using `is_alive()`?"
+            )
+
         # Increase mana by 1 every turns
         self.stats.mana.increase(1, self.stats.get('max_mana'))
 
@@ -138,8 +146,23 @@ class Entity:
         return damage
 
     def make_move(self, move: MoveType, target: "Entity") -> int:
+        """Make a move.
+
+        Args:
+            move (MoveType): Enums from game.enums.MoveType
+            target (Entity): Target of the move. (If heal, still put monster.)
+
+        Raises:
+            CannotMove: Entity is stunned or already dead.
+            InvalidMove: Unknown move.
+
+        Returns:
+            int: Amount of damage, Amount of heal, Poison durations or 1 for Stun.
+        """
         if self.is_stun() or not self.is_alive():
-            raise CannotMakeMove
+            raise CannotMove(
+                "This entity is either stunned or already dead."
+            )
 
         ret = 0
 
@@ -173,6 +196,6 @@ class Entity:
             target.stats.mana.reduce(mana_amount, 0)
             ret = mana_amount
         else:
-            raise InvalidMove
+            raise InvalidMove("Could not recognize `MoveType`.")
 
         return ret

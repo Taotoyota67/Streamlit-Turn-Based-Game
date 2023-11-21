@@ -14,7 +14,10 @@ class Player:
         self.skills = PlayerSkill(self.stats)
 
     def tick(self) -> None:
-        """Tick, Call this at the start of the turn.
+        """Applied a tick of combat state. (Poison, Mana regen, etc.)
+
+        Raises:
+            AlreadyDead: This entity is ALREADY DEAD.
         """
         return self.entity.tick()
 
@@ -47,14 +50,19 @@ class Player:
 
         Args:
             move (MoveType): Enums from game.enums.MoveType
-            target (Entity): target of the move. (if heal, put player.entity or monster.)
+            target (Entity): Target of the move. (If heal, still put monster.)
+
+        Raises:
+            CannotMakeMove: You don't have mana or move has not been granted.
+            CannotMove: Entity is stunned or already dead.
+            InvalidMove: Unknown move.
 
         Returns:
-            int: amount of damage or amount of heal, could be 1 for poison and etc.
+            int: Amount of damage, Amount of heal, Poison durations or 1 for Stun.
         """
         if not self.skills.can_use(move):
             raise CannotMakeMove(
-                "Cannot make a move due to mana or skill not granted."
+                "Cannot make a move due to mana or move not granted."
             )
 
         mana_cost = config.PLAYER_MOVE_COSTS[move.value]
