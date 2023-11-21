@@ -3,7 +3,7 @@ from typing import Optional, TypeVar
 import config
 from classes.enums import MoveType
 from classes.errors import CannotMakeMove, InvalidMove
-from classes.skills import Buff, Poison
+from classes.skills import Poison
 from classes.stats import Stats
 from classes.text import EntityText
 
@@ -27,7 +27,6 @@ class Entity:
 
         self._is_player = kwargs.get("is_player", False)
         self._poisons: list[Poison] = []  # [[duration, value]
-        self._buffs: list[Buff] = []
         self._stun: int = 0
 
         self.name = kwargs.get("name", None)
@@ -37,7 +36,6 @@ class Entity:
         return {
             "stats": self.stats.serialize(),
             "poisons": [[i.duration, i.multiplier] for i in self._poisons],
-            "buffs": [[i.duration, i.multiplier] for i in self._buffs],
             "stun": self._stun
         }
 
@@ -99,30 +97,15 @@ class Entity:
         """
         self._poisons.append(Poison(duration, multiplier))
 
-    def add_buff(self, duration: int, multiplier: float) -> None:
-        """Add buff to this entity.
-
-        Args:
-            duration (int): Buff duration.
-            multiplier (float): Buff multiplier.
-        """
-        self._buffs.append(Buff(duration, multiplier))
-
     def clear_poisons(self) -> None:
         """Clear all poisons.
         """
         self._poisons = []
 
-    def clear_buffs(self) -> None:
-        """Clear all buffs.
-        """
-        self._buffs = []
-
     def _clear_ran_out(self) -> None:
-        """Clear ran out effects (buff, poison).
+        """Clear ran out effects (poison).
         """
         self._poisons = [i for i in self._poisons if i.duration > 0]
-        self._buffs = [i for i in self._buffs if i.duration > 0]
 
     def get_damage(self) -> int:
         """Get damage, Call this function before `attack`.
@@ -130,12 +113,7 @@ class Entity:
         Returns:
             int: Amount of damage.
         """
-        damage = self.stats.damage.get()
-
-        for buff in self._buffs:
-            damage *= buff.multiplier
-
-        return int(damage)
+        return self.stats.damage.get()
 
     def get_heal_multiplier(self) -> float:
         if self._is_player:

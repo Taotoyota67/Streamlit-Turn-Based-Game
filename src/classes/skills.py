@@ -6,12 +6,6 @@ from classes.stats import Stats
 
 
 @dataclass
-class Buff:
-    duration: int
-    multiplier: float
-
-
-@dataclass
 class Poison:
     duration: int
     multiplier: float
