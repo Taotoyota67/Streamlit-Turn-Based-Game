@@ -27,7 +27,8 @@ class PlayerSkill:
         Args:
             move (MoveType): game.enums.MoveType
         """
-        self._moves.append(move)
+        if move not in self._moves:
+            self._moves.append(move)
 
     def get_all(self) -> list[MoveType]:
         """Get all avaliable moves.

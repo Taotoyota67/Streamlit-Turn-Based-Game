@@ -179,7 +179,7 @@ class Entity:
                 config.POISON_DURATION,
                 config.POISON_MULTIPLIER
             )
-            ret = 1
+            ret = config.POISON_DURATION
         elif move == MoveType.LIFE_STEAL:
             damage = self.attack(target)
             self.stats.health.increase(

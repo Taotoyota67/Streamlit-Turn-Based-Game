@@ -311,9 +311,10 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
 
     sess.nset("pass_mon_turn", True)
     sess.nset("press_hit_skill", False)
+    sess.nset("do_skill", None)
 
     # Choosing between MONSTER and BOSS
-    if room in [5, 11, 17]:
+    if room in [4, 8, 12]:
         monster = sess.gset(
             "monster",
             game.get_monster(random.choice(boss_list))
@@ -329,14 +330,32 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
     if sess["pass_mon_turn"]:
         player.tick()
 
-    if room <= 6:
+    if room <= 4:
         floor = 1
-    elif 7 <= room <= 12:
+    elif 5 <= room <= 8:
         floor = 2
+        monster.stats.max_health.set(
+            int(1.5 * monster.stats.get("max_health"))
+        )
+        monster.stats.health.set(
+            int(1.5 * monster.stats.get("health"))
+        )
+        monster.stats.damage.set(
+            int(1.5 * monster.stats.get("damage"))
+        )
     else:
         floor = 3
+        monster.stats.max_health.set(
+            int(2.5 * monster.stats.get("max_health"))
+        )
+        monster.stats.health.set(
+            int(2.5 * monster.stats.get("health"))
+        )
+        monster.stats.damage.set(
+            int(2.5 * monster.stats.get("damage"))
+        )
 
-    col1.title(f":blue[FLOOR {floor} | ROOM {room}]")
+    col1.title(f":blue[FLOOR {floor} | ROOM {room % 5}]")
     chart_empty = col1.empty()
 
     def update_player_status_chart():
@@ -356,13 +375,14 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
     update_player_status_chart()
 
     def dissable_button() -> bool:
-        return player.is_stun() or sess["press_hit_skill"]
+        return not player.is_alive() or player.is_stun() or sess["press_hit_skill"]
 
     def dissable_skill(move: MoveType) -> bool:
         return dissable_button() and player.skills.can_use(move)
 
     # Still don't pass monster turn
-    def not_pass_mon():
+    def skill_click(move_type=None):
+        sess["do_skill"] = move_type
         sess["pass_mon_turn"] = False
         sess["press_hit_skill"] = True
 
@@ -384,104 +404,68 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
         sleep(2)
         empty.empty()
 
-    # Cheat button
-    if st.sidebar.button("CHEAT", disabled=dissable_button(), on_click=not_pass_mon):
+    for skill in player.skills.get_all():
+        col1.button(
+            skill.name.replace("_", " ").replace("DAMAGE BUFF", "DAMAGE x2"),
+            key=skill.name,
+            disabled=dissable_skill(skill),
+            on_click=skill_click,
+            args=(skill,))
+
+    # KILL MONSTER button
+    if st.sidebar.button("KILL MONSTER", disabled=dissable_button(), on_click=skill_click):
         player.entity.attack(monster, 1000)
         st.rerun()
 
-    # Hit button
-    if col1.button("HIT", disabled=dissable_button(), on_click=not_pass_mon):
-        player_move_amount = player.make_move(MoveType.ATTACK, monster)
-
-        # Animate text
-        write_text(
-            player_text,
-            f"Dealing DAMAGE for {player_move_amount} damage.",
-            "\"Whatever it takes... Keep moving.\"", 1, 1.5
-        )
+    # KILL PLAYER button
+    if st.sidebar.button("KILL PLAYER", disabled=dissable_button(), on_click=skill_click):
+        monster.attack(player.entity, 1000)
         st.rerun()
 
-    # Skill buttons
-    if "DAMAGE x2" in sess["skills_list"]:
-        if col1.button(
-                "DAMAGE x2",
-                disabled=dissable_skill(MoveType.DAMAGE_BUFF),
-                on_click=not_pass_mon):
+    if sess["do_skill"] is not None:
+        player_move_amount = player.make_move(sess["do_skill"], monster)
 
-            player_move_amount = player.make_move(
-                MoveType.DAMAGE_BUFF, monster)
-
-            # Animate text
+        # Animate player text
+        if sess["do_skill"] == MoveType.ATTACK:
             write_text(
                 player_text,
-                f"Your dealt {player_move_amount} damage!",
-                "\"The strength of the mighty one\"", 1, 1.5
+                f"Dealt {player_move_amount} damage.",
+                "\"Whatever it takes... Keep moving.\"", 1, 1.5
             )
-            st.rerun()
-
-    if "HEAL" in sess["skills_list"]:
-        if col1.button(
-                "HEAL",
-                disabled=dissable_skill(MoveType.HEAL),
-                on_click=not_pass_mon):
-
-            player_move_amount = player.make_move(MoveType.HEAL, monster)
-
-            # Animate text
+        elif sess["do_skill"] == MoveType.DAMAGE_BUFF:
+            write_text(
+                player_text,
+                f"Dealt {player_move_amount} damage.",
+                "\"The strength for the mighty one.\"", 1, 1.5
+            )
+        elif sess["do_skill"] == MoveType.HEAL:
             write_text(
                 player_text,
                 f"You used heal... Your health has increased for {player_move_amount} health.",
                 "\"There is something you need to do right?\"", 1, 1.5
             )
-            st.rerun()
-
-    if "POISON" in sess["skills_list"]:
-        if col1.button(
-                "POISON",
-                disabled=dissable_skill(MoveType.POISON),
-                on_click=not_pass_mon):
-
-            player_move_amount = player.make_move(MoveType.POISON, monster)
-
-            # Animate text
+        elif sess["do_skill"] == MoveType.POISON:
             write_text(
                 player_text,
                 f"You used POISON... {monster.name} is poisoned for {player_move_amount} turns.",
                 "\"A gradual decay... The inevitable plight of mortal\"", 1.5, 1.5
             )
-            st.rerun()
-
-    if "LIFE STEAL" in sess["skills_list"]:
-        if col1.button(
-                "LIFE STEAL",
-                disabled=dissable_skill(MoveType.LIFE_STEAL),
-                on_click=not_pass_mon):
-
-            player_move_amount = player.make_move(MoveType.LIFE_STEAL, monster)
-
-            # Animate text
+        elif sess["do_skill"] == MoveType.LIFE_STEAL:
             write_text(
                 player_text,
                 f"You used LIFE STEAL... You stole enemy health for {player_move_amount} health.",
                 "\"A valuable source of life... Don't let anyone take it from you\"", 1.5, 1.5
             )
-            st.rerun()
-
-    if "STUN" in sess["skills_list"]:
-        if col1.button(
-                "STUN",
-                disabled=dissable_skill(MoveType.STUN),
-                on_click=not_pass_mon):
-
-            player_move_amount = player.make_move(MoveType.STUN, monster)
-
-            # Animate text
+        elif sess["do_skill"] == MoveType.STUN:
             write_text(
                 player_text,
                 f"You used STUN... {monster.name} is stunned for 1 round",
                 "\"A little rest won't hurt.\"", 1, 1
             )
-            st.rerun()
+
+        # Update player chart
+        update_player_status_chart()
+        sess["do_skill"] = None
 
     if (player.is_stun() or sess["press_hit_skill"]) and monster.is_alive():
         monster.tick()
@@ -507,11 +491,11 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
         col2.altair_chart(mon_chart)
 
     update_monster_status_chart()
-    col2.image(monster.image, width=1000)
+    col2.image(monster.image, width=650)
     mon_text = col2.empty()
 
     # Monster make move
-    if player.is_stun() or sess["press_hit_skill"]:
+    if (player.is_stun() or sess["press_hit_skill"]) and player.is_alive():
         if monster.is_stun():
             # Animate text
             write_text(mon_text, f"{monster.name} is STUNNED.",
@@ -555,7 +539,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
             st.rerun()
 
     # if monster is not alive
-    if not monster.is_alive():
+    if (not monster.is_alive()) or (not player.is_alive()):
         if col1.button("NEXT"):
             sess["press_hit_skill"] = False
             sess["room"] += 1
@@ -565,10 +549,10 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
 
             del st.session_state["monster"]
 
-            if sess["room"] in [3, 6, 9, 12, 15]:
-                change_page("buff")
-            elif (sess["room"] in [18]) or not player.is_alive():
+            if (sess["room"] in [13]) or not player.is_alive():
                 change_page("end")
+            elif sess["room"] in [3, 5, 7, 9, 11]:
+                change_page("buff")
             st.rerun()
 
 
@@ -631,12 +615,22 @@ def buff():  # pylint: disable=too-many-statements
     if sess["confirm"]:
         if sess["choose"] == 1:
             player.stats.max_health.increase(10)
+            player.stats.health.increase(10)
+            sess["choose"] = 0
         elif sess["choose"] == 2:
             player.stats.max_mana.increase(10)
+            player.stats.mana.increase(10)
+            sess["choose"] = 0
+
         elif sess["choose"] == 3:
             player.stats.damage.increase(5)
+            sess["choose"] = 0
 
-        write_buff(max_hp, max_mana, atk)
+        write_buff(
+            player.stats.max_health.get(),
+            player.stats.max_mana.get(),
+            player.stats.damage.get()
+        )
 
         if col1.button("NEXT"):
             sess["room"] += 1

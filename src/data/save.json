@@ -1,12 +1,4 @@
 {
-    "accounts": {
-        "papa": [
-            "89a57da81aa770afd79004dfa1727617e8925381a3065b289a55c4d4efaf3ccf0b72bcd402dca75e1b52244214ab972ad5c20402494df1ba23f24e32097f8df8",
-            "876871d7a4d54a5da15086a69e4218b2"
-        ]
-    },
-    "users": {
-        "admin": {},
-        "papa": {}
-    }
+    "accounts": {},
+    "users": {}
 }
