@@ -58,7 +58,7 @@ class Player:
             InvalidMove: Unknown move.
 
         Returns:
-            int: Amount of damage, Amount of heal, Poison durations or 1 for Stun.
+            int: Amount of damage, Amount of heal, Poison or Stun durations.
         """
         if not self.skills.can_use(move):
             raise CannotMakeMove(

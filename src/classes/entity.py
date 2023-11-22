@@ -157,7 +157,7 @@ class Entity:
             InvalidMove: Unknown move.
 
         Returns:
-            int: Amount of damage, Amount of heal, Poison durations or 1 for Stun.
+            int: Amount of damage, Amount of heal, Poison or Stun durations.
         """
         if self.is_stun() or not self.is_alive():
             raise CannotMove(
