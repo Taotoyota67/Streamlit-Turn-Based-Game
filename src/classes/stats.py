@@ -22,7 +22,7 @@ class Stat:
             value (int): Increase amount.
             max_value (Optional[Number], optional): int. Defaults to None.
         """
-        if not max_value:
+        if max_value is None:
             max_value = float('inf')
 
         self.__value = min(self.__value + value, max_value)
@@ -34,7 +34,7 @@ class Stat:
             value (int): Reduce amount.
             min_value (Optional[Number], optional): int. Defaults to None.
         """
-        if not min_value:
+        if min_value is None:
             min_value = float("-inf")
 
         self.__value = max(self.__value - value, min_value)
