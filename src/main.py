@@ -168,7 +168,7 @@ def login():
     st.rerun()
 
 
-def choosing_status():
+def choosing_status():  # pylint: disable=too-many-branches,too-many-statements
     if sess["game"] is None:
         raise RuntimeError("Game object is not initialized.")
 
@@ -291,7 +291,7 @@ def choosing_status():
             st.rerun()
 
 
-def fight():
+def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     if sess["game"] is None:
         raise RuntimeError("Game object is not initialized.")
 
@@ -572,7 +572,7 @@ def fight():
             st.rerun()
 
 
-def buff():
+def buff():  # pylint: disable=too-many-statements
     if sess["game"] is None:
         raise RuntimeError("Game object is not initialized.")
 
