@@ -442,4 +442,4 @@ PLAYER_BUFF_DURATION = 2  # 2 turns
 PLAYER_HEAL_MULTIPLIER = 0.5  # 50% of max hp
 
 POISON_MULTIPLIER = 0.1  # 10% of max hp per turn
-POISON_DURATION = 2  # poison duration (turns)
+POISON_DURATION = 4  # poison duration (turns)
