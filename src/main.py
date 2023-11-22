@@ -6,16 +6,11 @@ from game import Game
 from utils.layout import setup_page
 from utils.animate import animate_text
 
-# My import
-
-# from entity2 import Player
 from storage import PersistanceStorage
 import random
 from time import sleep
 import pandas as pd
 import altair as alt
-
-# My import
 
 sess = PersistanceStorage(st)
 acc = sess.gset("accounts", Accounts())
@@ -393,8 +388,6 @@ def fight():
         # Animate text
         write_text(player_text, f"Dealing DAMAGE for {player_move_amount}.",
                    "\"Whatever it takes... keep moving\"", 1, 1.5)
-
-        player.make_move(MoveType.ATTACK, monster)
         st.rerun()
 
     # Skill buttons
@@ -543,12 +536,17 @@ def fight():
             sess["all_mon_list"].remove(monster.name)
             del st.session_state["monster"]
 
-            if sess["room"] in [3, 6, 9, 12, 15, 18]:
+            if sess["room"] in [3, 6, 9, 12, 15]:
                 change_page("buff")
+            elif (sess["room"] in [18]) or not player.is_alive():
+                change_page("end")
             st.rerun()
 
 
 def buff():
+    # Set up webpage, load CSS
+    st.set_page_config(layout="centered")  # type: ignore
+
     sess.gset("choose", "unknown")
     sess.gset("anable_confirm", False)
     sess.gset("confirm", False)
@@ -612,6 +610,22 @@ def buff():
             st.rerun()
 
 
+def end():
+    # Set up webpage, load CSS
+    st.set_page_config(layout="centered")  # type: ignore
+    col1, col2, col3 = st.columns(3)
+    if player.is_alive():
+        col2.markdown(
+            "<h1 style='text-align: center; color: blue;'>VICTORY</h1>", unsafe_allow_html=True)
+    else:
+        col2.markdown(
+            "<h1 style='text-align: center; color: blue;'>LOSE</h1>", unsafe_allow_html=True)
+    if col2.button("HOME PAGE", use_container_width=True):
+        st.session_state.clear()
+        change_page("main_page")
+        st.rerun()
+
+
 pages = {
     "main_page": main_page,
     "create_account_page": create_account_page,
@@ -621,7 +635,8 @@ pages = {
     "login": login,
     "choosing_status": choosing_status,
     "fight": fight,
-    "buff": buff
+    "buff": buff,
+    "end": end
 }
 
 
