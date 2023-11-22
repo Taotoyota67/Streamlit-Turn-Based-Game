@@ -560,7 +560,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
 
             del st.session_state["monster"]
 
-            if (sess["room"] in [13]) or not player.is_alive():
+            if sess["room"] == 13 or not player.is_alive():
                 change_page("end")
             elif sess["room"] in [3, 5, 7, 9, 11]:
                 change_page("buff")
@@ -644,7 +644,6 @@ def buff():  # pylint: disable=too-many-statements
         )
 
         if col1.button("NEXT"):
-            sess["room"] += 1
             del st.session_state["choose"]
             del st.session_state["confirm"]
             del st.session_state["anable_confirm"]
