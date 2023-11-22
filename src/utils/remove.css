@@ -13,20 +13,14 @@ details {
     /* disable save button on graph */
 }
 
-/* set shit to center */
-div[data-testid="column"] {
-    text-align: center;
+div[data-testid=block-container] {
+    padding: 1rem 1rem 1rem;
 }
 
-div[data-testid="column"]:nth-of-type(2) {
-    border: 2px solid red;
+footer {
+    display: none;
 }
 
-/* image goes centerrrr */
-div[data-testid=stImage] {
+div {
     text-align: center;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
 }

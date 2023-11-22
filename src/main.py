@@ -1,26 +1,25 @@
+import random
 import time
+from time import sleep
+
+import altair as alt
+import pandas as pd
 import streamlit as st
 
-from accounts import Accounts, AccountAlreadyExists
-from game import Game
-from utils.layout import setup_page
-from utils.animate import animate_text
-
+from accounts import AccountAlreadyExists, Accounts
+from game import Game, enums
 from storage import PersistanceStorage
-import random
-from time import sleep
-import pandas as pd
-import altair as alt
+from utils.animate import animate_text
+from utils.layout import load_game_css, load_remove_css
 
 sess = PersistanceStorage(st)
+
 acc = sess.gset("accounts", Accounts())
 username = sess.gset("username", "")
 password = sess.gset("password", "")
 login_status = sess.gset("login_status", True)
-game = sess.gset("game", Game("admin"))
-player = sess.gset("player", game.player)
-MoveType = game.enums.MoveType
 
+MoveType = enums.MoveType
 
 if "page" not in st.session_state:
     st.session_state["page"] = "main_page"
@@ -31,8 +30,10 @@ def change_page(page: str) -> None:
 
 
 def main_page():
-    # setup_page(st)
-    col1, col2, col3 = st.columns([0.125, 0.75, 0.125])
+    load_remove_css()
+
+    _, col2, _ = st.columns([0.125, 0.75, 0.125])
+
     col2.markdown(
         "<h1 style='text-align: center; color: blue;'>PROJECT M</h1>", unsafe_allow_html=True)
     col2.markdown(
@@ -40,26 +41,26 @@ def main_page():
     col2.title("")
     col2.title("")
     # Buttons
-    col2.button("**:blue[Yes]**", on_click=change_page, args=(
+    col2.button("**:green[Yes]**", on_click=change_page, args=(
         "create_account_page", ), use_container_width=True)
     col2.title("")
-    # st.button("No", on_click=change_page, args=("login", ))
-    col2.button("**No**", on_click=change_page, args=(
+    col2.button("**:red[No]**", on_click=change_page, args=(
         "login_page", ), use_container_width=True)
 
 
 def create_account_page():
-    # setup_page(st)
-    global username
+    load_remove_css()
+
     if acc.has(username):
-        st.title(":red[Account already exists!]")
+        st.title(":red[Account Already Exists!]")
     else:
         st.title(":blue[Let's create an account then...]")
 
     st.write("What is your username?")
     if not username:
         st.write(
-            "*The Confirm button will be disable if your username sucks.*")
+            "*The Confirm button will be disable if your username sucks.*"
+        )
     else:
         st.write(f"Your username is :blue[**{username}**]")
 
@@ -81,8 +82,8 @@ def create_account_page():
 
 
 def create_password_page():
-    # setup_page(st)
-    global username, password
+    load_remove_css()
+
     st.title(":blue[Good name!]")
     st.write(f"Now :blue[**{username}**], What is your password?")
 
@@ -103,9 +104,9 @@ def create_password_page():
 
 
 def create_account():
-    # setup_page(st)
-    global acc, username, password
-    st.title(":blue[Creating account...]")
+    load_remove_css()
+
+    st.title(":blue[Creating Account...]")
     try:
         acc.add(username, password)
     except AccountAlreadyExists:
@@ -118,8 +119,7 @@ def create_account():
 
 
 def login_page():
-    # setup_page(st)
-    global acc, username, password
+    load_remove_css()
 
     st.title(
         ":blue[Welcome back!]" if login_status else ":red[Incorrect username or password :(]"
@@ -147,8 +147,8 @@ def login_page():
 
 
 def login():
-    # setup_page(st)
-    global acc, username, password
+    load_remove_css()
+
     st.title(":blue[Logging in...]")
     try:
         success = acc.login(username, password)
@@ -156,6 +156,7 @@ def login():
         sess["login_status"] = False
         change_page("login_page")
         st.rerun()
+        return  # Add return so IDE knows we left.
 
     if not success:
         sess["login_status"] = success
@@ -168,11 +169,17 @@ def login():
 
 
 def choosing_status():
-    global player, MoveType
-    sess.gset("choose", "unknown")
-    sess.gset("anable_confirm", False)
-    sess.gset("confirm", False)
-    sess.gset("skills_list", [])
+    if sess["game"] is None:
+        raise RuntimeError("Game object is not initialized.")
+
+    load_remove_css()
+
+    player = sess["game"].player
+
+    sess.nset("choose", 0)
+    sess.nset("anable_confirm", False)
+    sess.nset("confirm", False)
+    sess.nset("skills_list", [])
     col1, col2 = st.columns([0.7, 0.3], gap="large")
     col1.title(":blue[Choose your status]")
 
@@ -201,64 +208,71 @@ def choosing_status():
 
     # Status Choice
     if col1.button("1st status", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "1st"
+        sess["choose"] = 1
         sess["anable_confirm"] = True
         st.rerun()
     if col1.button("2nd status", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "2nd"
+        sess["choose"] = 2
         sess["anable_confirm"] = True
         st.rerun()
     if col1.button("3rd status", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "3rd"
+        sess["choose"] = 3
         sess["anable_confirm"] = True
         st.rerun()
 
-    col1.title(":blue[Choose your skills]")
-    col1.write("choose 3 from 5 skills")
+    col1.title(":blue[Choose Your Skills]")
+    col1.write("You may choose 3 from 5 skills")
 
     # Skills multiselect
-    skills_list = col1.multiselect(label="", options=["DAMAGE BUFF", "HEAL", "POISON", "LIFE STEAL", "STUN"],
-                                   default=sess["skills_list"],
-                                   max_selections=3,
-                                   disabled=sess["confirm"],
-                                   label_visibility="collapsed")
+    skills_list = col1.multiselect(
+        label="",
+        options=["DAMAGE x2", "HEAL", "POISON", "LIFE STEAL", "STUN"],
+        default=sess["skills_list"],
+        max_selections=3,
+        disabled=sess["confirm"],
+        label_visibility="collapsed"
+    )
 
     if skills_list != sess["skills_list"]:
         sess["skills_list"] = skills_list
         st.rerun()
 
-    if col1.button("CONFIRM STATUS AND SKILLS", disabled=(not (sess["anable_confirm"])) or (not len(sess["skills_list"]) == 3) or sess["confirm"]):
+    if col1.button(
+        "CONFIRM STATUS AND SKILLS",
+        disabled=(not sess["anable_confirm"]
+                  or len(sess["skills_list"]) != 3
+                  or sess["confirm"])
+    ):
         sess["confirm"] = True
         st.rerun()
 
     # Write status after clicking button
-    if sess["choose"] != "unknown":
-        if sess["choose"] == "1st":
-            write_status(100, 100, 5)
-            player.stats.max_health.set(100)
-            player.stats.health.set(100)
-            player.stats.max_mana.set(100)
-            player.stats.mana.set(100)
-            player.stats.damage.set(5)
-        elif sess["choose"] == "2nd":
-            write_status(150, 50, 7)
-            player.stats.max_health.set(150)
-            player.stats.health.set(150)
-            player.stats.max_mana.set(50)
-            player.stats.mana.set(50)
-            player.stats.damage.set(7)
-        elif sess["choose"] == "3rd":
-            write_status(50, 150, 7)
-            player.stats.max_health.set(50)
-            player.stats.health.set(50)
-            player.stats.max_mana.set(150)
-            player.stats.mana.set(150)
-            player.stats.damage.set(7)
+    if sess["choose"] == 1:
+        write_status(100, 100, 5)
+        player.stats.max_health.set(100)
+        player.stats.health.set(100)
+        player.stats.max_mana.set(100)
+        player.stats.mana.set(100)
+        player.stats.damage.set(5)
+    elif sess["choose"] == 2:
+        write_status(150, 50, 7)
+        player.stats.max_health.set(150)
+        player.stats.health.set(150)
+        player.stats.max_mana.set(50)
+        player.stats.mana.set(50)
+        player.stats.damage.set(7)
+    elif sess["choose"] == 3:
+        write_status(50, 150, 7)
+        player.stats.max_health.set(50)
+        player.stats.health.set(50)
+        player.stats.max_mana.set(150)
+        player.stats.mana.set(150)
+        player.stats.damage.set(7)
 
     # Write skills after clicking confirm and anable "NEXT" button
     if sess["confirm"]:
         write_skills()
-        if "DAMAGE BUFF" in sess["skills_list"]:
+        if "DAMAGE x2" in sess["skills_list"]:
             player.skills.grant(MoveType.DAMAGE_BUFF)
         if "HEAL" in sess["skills_list"]:
             player.skills.grant(MoveType.HEAL)
@@ -278,42 +292,46 @@ def choosing_status():
 
 
 def fight():
-    global player, MoveType
+    if sess["game"] is None:
+        raise RuntimeError("Game object is not initialized.")
+
+    game: Game = sess["game"]
+    player = game.player
+
+    st.set_page_config(layout="wide")
+    load_remove_css()
+    load_game_css()
+
     room = sess.gset("room", 1)
+
     all_mon_list = sess.gset("all_mon_list", game.monsters.get_all_names())
     boss_list = ["The Gatekeeper", "The Soul Collector", "The Corrupted",
                  "The Rhinoceros", "The Dark Wizard", "The Inferno"]
     mon_list = [name for name in all_mon_list if name not in boss_list]
-    sess.gset("pass_mon_turn", True)
-    sess.gset("press_hit_skill", False)
+
+    sess.nset("pass_mon_turn", True)
+    sess.nset("press_hit_skill", False)
 
     # Choosing between MONSTER and BOSS
     if room in [5, 11, 17]:
         monster = sess.gset(
-            "monster", game.get_monster(random.choice(boss_list)))
+            "monster",
+            game.get_monster(random.choice(boss_list))
+        )
     else:
         monster = sess.gset(
-            "monster", game.get_monster(random.choice(mon_list)))
-
-    # Set up webpage, load CSS
-    st.set_page_config(layout="wide")  # type: ignore
+            "monster",
+            game.get_monster(random.choice(mon_list))
+        )
 
     col1, col2 = st.columns([2, 4])
 
-    # Disable weird shits using css
-    with open('mylifesad.css') as f:
-        hide_img_fs = f"<style>{f.read()}</style>"
-
-    st.markdown(hide_img_fs, unsafe_allow_html=True)
-    # sess.gset("setup_page", setup_page(st))
-
-    # Set up player
     if sess["pass_mon_turn"]:
         player.tick()
-    # Player display
-    if room in [1, 2, 3, 4, 5, 6]:
+
+    if room <= 6:
         floor = 1
-    elif room in [7, 8, 9, 10, 11, 12]:
+    elif 7 <= room <= 12:
         floor = 2
     else:
         floor = 3
@@ -322,43 +340,40 @@ def fight():
     chart_empty = col1.empty()
 
     def update_player_status_chart():
-        if player.is_alive():
-            status = {
-                'Status': ['HP', "MANA"],
-                'amount': [player.stats.health.get(), player.stats.mana.get()]
-            }
-        else:
-            status = {
-                'Status': ['HP', "MANA"],
-                'amount': [0, player.stats.mana.get()]
-            }
+        status = {
+            'Status': ['HP', "MANA"],
+            'Amount': [player.stats.health.get(), player.stats.mana.get()]
+        }
 
         d_hp = pd.DataFrame(status)
         my_chart = alt.Chart(d_hp).mark_bar().encode(
             x="Status",
-            y=alt.X("amount", scale=alt.Scale(
+            y=alt.X("Amount", scale=alt.Scale(
                 domain=[0, max(player.stats.max_health.get(), player.stats.max_mana.get())]))
         ).properties(width=200)
         chart_empty.altair_chart(my_chart)
 
     update_player_status_chart()
 
-    # Disable player button if...
-    def dis_but():
-        if player.is_stun() or sess["press_hit_skill"]:
-            return True
-        else:
-            return False
+    def dissable_button() -> bool:
+        return player.is_stun() or sess["press_hit_skill"]
+
+    def dissable_skill(move: MoveType) -> bool:
+        return dissable_button() and player.skills.can_use(move)
 
     # Still don't pass monster turn
     def not_pass_mon():
         sess["pass_mon_turn"] = False
+        sess["press_hit_skill"] = True
 
-    # Player text empty
     player_text = col1.empty()
 
     # Animate text
-    def write_text(empty, move_text: str, talk_text: str, move_text_time: float, talk_text_time: float):
+    def write_text(empty,
+                   move_text: str,
+                   talk_text: str,
+                   move_text_time: float,
+                   talk_text_time: float):
         animate_text(empty, move_text, time_per_sentence=move_text_time)
         sleep(2)
         animate_text(
@@ -370,79 +385,107 @@ def fight():
         empty.empty()
 
     # Cheat button
-    if st.sidebar.button("CHEAT", disabled=dis_but(), on_click=not_pass_mon):
-        sess["press_hit_skill"] = True
-        # player_move_amount = player.make_move(MoveType.ATTACK, monster)
-        # # Animate text
-        # write_text(player_text, f"Dealing DAMAGE for {player_move_amount}.",
-        #            "\"Whatever it takes... keep moving\"", 1, 1.5)
-
-        # player.make_move(MoveType.ATTACK, monster)
+    if st.sidebar.button("CHEAT", disabled=dissable_button(), on_click=not_pass_mon):
         player.entity.attack(monster, 1000)
         st.rerun()
 
     # Hit button
-    if col1.button("HIT", disabled=dis_but(), on_click=not_pass_mon):
-        sess["press_hit_skill"] = True
+    if col1.button("HIT", disabled=dissable_button(), on_click=not_pass_mon):
         player_move_amount = player.make_move(MoveType.ATTACK, monster)
+
         # Animate text
-        write_text(player_text, f"Dealing DAMAGE for {player_move_amount}.",
-                   "\"Whatever it takes... keep moving\"", 1, 1.5)
+        write_text(
+            player_text,
+            f"Dealing DAMAGE for {player_move_amount} damage.",
+            "\"Whatever it takes... Keep moving.\"", 1, 1.5
+        )
         st.rerun()
 
     # Skill buttons
-    if "DAMAGE BUFF" in sess["skills_list"]:
-        if col1.button("DAMAGE BUFF", disabled=dis_but() or not player.skills.can_use(MoveType.DAMAGE_BUFF),  on_click=not_pass_mon):
-            sess["press_hit_skill"] = True
+    if "DAMAGE x2" in sess["skills_list"]:
+        if col1.button(
+                "DAMAGE x2",
+                disabled=dissable_skill(MoveType.DAMAGE_BUFF),
+                on_click=not_pass_mon):
+
             player_move_amount = player.make_move(
                 MoveType.DAMAGE_BUFF, monster)
 
             # Animate text
-            write_text(player_text, f"Your DAMAGE increase to {player_move_amount}",
-                       "\"The strength for the mighty one\"", 1, 1.5)
-
+            write_text(
+                player_text,
+                f"Your dealt {player_move_amount} damage!",
+                "\"The strength of the mighty one\"", 1, 1.5
+            )
             st.rerun()
+
     if "HEAL" in sess["skills_list"]:
-        if col1.button("HEAL", disabled=dis_but() or not player.skills.can_use(MoveType.HEAL), on_click=not_pass_mon):
-            sess["press_hit_skill"] = True
+        if col1.button(
+                "HEAL",
+                disabled=dissable_skill(MoveType.HEAL),
+                on_click=not_pass_mon):
+
             player_move_amount = player.make_move(MoveType.HEAL, monster)
 
             # Animate text
-            write_text(player_text, f"You are healing... increasing HP for {player_move_amount}",
-                       "\"There is something you need to do right?\"", 1, 1.5)
+            write_text(
+                player_text,
+                f"You used heal... Your health has increased for {player_move_amount} health.",
+                "\"There is something you need to do right?\"", 1, 1.5
+            )
             st.rerun()
+
     if "POISON" in sess["skills_list"]:
-        if col1.button("POISON", disabled=dis_but() or not player.skills.can_use(MoveType.POISON), on_click=not_pass_mon):
-            sess["press_hit_skill"] = True
+        if col1.button(
+                "POISON",
+                disabled=dissable_skill(MoveType.POISON),
+                on_click=not_pass_mon):
+
             player_move_amount = player.make_move(MoveType.POISON, monster)
 
             # Animate text
-            write_text(player_text, f"You used POISON... {monster.name} will take damage over time for {player_move_amount}.",
-                       "\"A gradual decay... The inevitable plight of mortal\"", 1.5, 1.5)
+            write_text(
+                player_text,
+                f"You used POISON... {monster.name} is poisoned for {player_move_amount} turns.",
+                "\"A gradual decay... The inevitable plight of mortal\"", 1.5, 1.5
+            )
             st.rerun()
+
     if "LIFE STEAL" in sess["skills_list"]:
-        if col1.button("LIFE STEAL", disabled=dis_but() or not player.skills.can_use(MoveType.LIFE_STEAL), on_click=not_pass_mon):
-            sess["press_hit_skill"] = True
+        if col1.button(
+                "LIFE STEAL",
+                disabled=dissable_skill(MoveType.LIFE_STEAL),
+                on_click=not_pass_mon):
+
             player_move_amount = player.make_move(MoveType.LIFE_STEAL, monster)
 
             # Animate text
-            write_text(player_text, f"You used LIFE STEAL... decrease {monster.name} HP to increase yours for {player_move_amount}.",
-                       "\"A valuable source of life... don't let anyone take it from you\"", 1.5, 1.5)
+            write_text(
+                player_text,
+                f"You used LIFE STEAL... You stole enemy health for {player_move_amount} health.",
+                "\"A valuable source of life... Don't let anyone take it from you\"", 1.5, 1.5
+            )
             st.rerun()
+
     if "STUN" in sess["skills_list"]:
-        if col1.button("STUN", disabled=dis_but() or not player.skills.can_use(MoveType.STUN), on_click=not_pass_mon):
-            sess["press_hit_skill"] = True
+        if col1.button(
+                "STUN",
+                disabled=dissable_skill(MoveType.STUN),
+                on_click=not_pass_mon):
+
             player_move_amount = player.make_move(MoveType.STUN, monster)
 
             # Animate text
-            write_text(player_text, f"You used STUN... {monster.name} will be incapable for 1 round",
-                       "\"A little rest won't hurt.\"", 1, 1)
-
+            write_text(
+                player_text,
+                f"You used STUN... {monster.name} is stunned for 1 round",
+                "\"A little rest won't hurt.\"", 1, 1
+            )
             st.rerun()
 
-    # Set up monster
     if (player.is_stun() or sess["press_hit_skill"]) and monster.is_alive():
         monster.tick()
+
     # Monster display
     if monster.name in boss_list:
         col2.title(f":red[{monster.name}]")
@@ -450,20 +493,14 @@ def fight():
         col2.title(f":blue[{monster.name}]")
 
     def update_monster_status_chart():
-        if monster.is_alive():
-            mon_hp = {
-                'Status': ['HP'],
-                'amount': [monster.stats.health.get()]
-            }
-        else:
-            mon_hp = {
-                'Status': ['HP'],
-                'amount': [0]
-            }
+        mon_hp = {
+            'Status': ['HP'],
+            'Amount': [monster.stats.health.get()]
+        }
 
         d_mon_hp = pd.DataFrame(mon_hp)
         mon_chart = alt.Chart(d_mon_hp).mark_bar().encode(
-            x=alt.X("amount", scale=alt.Scale(
+            x=alt.X("Amount", scale=alt.Scale(
                 domain=[0, monster.stats.max_health.get()])),
             y="Status"
         ).properties(height=105, width=500)
@@ -476,15 +513,11 @@ def fight():
     # Monster make move
     if player.is_stun() or sess["press_hit_skill"]:
         if monster.is_stun():
-            # # just testing text
-            # col2.write(f"{monster.name} is stun")
-            # time.sleep(3)
             # Animate text
             write_text(mon_text, f"{monster.name} is STUNNED.",
                        monster.text.get("got_attack"), 1, 1.5)
 
             time.sleep(3)
-            # update_monster_status_chart()
             sess["press_hit_skill"] = False
             sess["pass_mon_turn"] = True
             st.rerun()
@@ -493,37 +526,30 @@ def fight():
         elif monster.is_alive():
             mon_move = monster.random_move()
             mon_move_amount = monster.make_move(mon_move, player.entity)
-            # # just testing text
-            # col2.write(
-            #     f"{monster.name} did {mon_move} for {mon_move_amount}")
-            # time.sleep(3)
-            # sess["press_hit_skill"] = False
+
+            move_text = "Something went wrong!"
+            monster_text = monster.text.get(f"do_{mon_move.value}")
 
             # Animate text
             if mon_move == MoveType.ATTACK:
-                write_text(mon_text, f"{monster.name} is dealing DAMAGE for {mon_move_amount}.",
-                           monster.text.get("got_attack"), 1, 1.5)
+                move_text = f"{monster.name} ATTACKED you for {mon_move_amount} damage."
             elif mon_move == MoveType.DAMAGE_BUFF:
-                write_text(mon_text, f"{monster.name} DAMAGE increase to {mon_move_amount}",
-                           monster.text.get("do_damage_buff"), 1, 1.5)
+                move_text = f"{monster.name} ATTCKED using 2x DAMAGE for {mon_move_amount} damage."
             elif mon_move == MoveType.HEAL:
-                write_text(mon_text, f"{monster.name} is healing... increasing its HP for {mon_move_amount}",
-                           monster.text.get("do_heal"), 1, 1.5)
+                move_text = f"{monster.name} used HEAL and recovered {mon_move_amount} health."
             elif mon_move == MoveType.POISON:
-                write_text(mon_text, f"{monster.name} used POISON... PLAYER will take damage over time for {mon_move_amount}.",
-                           monster.text.get("do_poison"), 1, 1.5)
+                move_text = f"{monster.name} used POISON. "
+                move_text += f"YOU are poisoned for {mon_move_amount} turns."
             elif mon_move == MoveType.LIFE_STEAL:
-                write_text(mon_text, f"{monster.name} used LIFE STEAL... decrease PLAYER HP to increase its for {mon_move_amount}.",
-                           monster.text.get("do_life_steal"), 1, 1.5)
+                move_text = f"{monster.name} used LIFE STEAL. It stole {mon_move_amount} health."
             elif mon_move == MoveType.STUN:
-                write_text(mon_text, f"{monster.name} used STUN... PLAYER will be incapable for 1 round",
-                           monster.text.get("do_stun"), 1, 1.5)
+                move_text = f"{monster.name} used STUN. YOU will are stunned for 1 turn"
             elif mon_move == MoveType.MANA_DRAIN:
-                write_text(mon_text, f"{monster.name} drained PLAYER MANA for {mon_move_amount}.",
-                           monster.text.get("do_mana_drain"), 1, 1.5)
+                move_text = f"{monster.name} drained YOUR MANA for {mon_move_amount} mana."
 
-            time.sleep(3)
-            # update_monster_status_chart()
+            write_text(mon_text, move_text, monster_text, 1, 1.5)
+
+            time.sleep(1.5)
             sess["press_hit_skill"] = False
             sess["pass_mon_turn"] = True
             st.rerun()
@@ -533,7 +559,10 @@ def fight():
         if col1.button("NEXT"):
             sess["press_hit_skill"] = False
             sess["room"] += 1
-            sess["all_mon_list"].remove(monster.name)
+            # Temp fix, unknown bug caused by very competent frontend
+            if monster.name in sess["all_mon_list"]:
+                sess["all_mon_list"].remove(monster.name)
+
             del st.session_state["monster"]
 
             if sess["room"] in [3, 6, 9, 12, 15]:
@@ -544,27 +573,35 @@ def fight():
 
 
 def buff():
-    # Set up webpage, load CSS
-    st.set_page_config(layout="centered")  # type: ignore
+    if sess["game"] is None:
+        raise RuntimeError("Game object is not initialized.")
 
-    sess.gset("choose", "unknown")
-    sess.gset("anable_confirm", False)
-    sess.gset("confirm", False)
+    game: Game = sess["game"]
+    player = game.player
+
+    st.set_page_config(layout="centered")
+    load_remove_css()
+
+    sess.nset("choose", 0)
+    sess.nset("anable_confirm", False)
+    sess.nset("confirm", False)
+
     max_hp = player.stats.max_health.get()
     max_mana = player.stats.max_mana.get()
     atk = player.stats.damage.get()
+
     col1, col2 = st.columns([0.7, 0.3], gap="large")
-    col1.title(":blue[Choose your BUFF]")
+    col1.title(":blue[Choose Your BUFF]")
 
     def write_buff(hp, mana, atk):
         col2.title(" ")
 
         status = {'Status': ['HP', "MANA", "ATK"],
-                  'amount': [hp, mana, atk]}
+                  'Amount': [hp, mana, atk]}
         d_hp = pd.DataFrame(status)
         my_chart = alt.Chart(d_hp).mark_bar().encode(
             x="Status",
-            y=alt.X("amount", scale=alt.Scale(domain=[0, 150]))
+            y=alt.X("Amount", scale=alt.Scale(domain=[0, 150]))
         ).properties(width=200)
 
         col2.altair_chart(my_chart)
@@ -574,16 +611,16 @@ def buff():
         col2.write(f"MANA: {mana}")
         col2.write(f"ATK: {atk}")
 
-    if col1.button("MAX HP + 10", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "MAX HP + 10"
+    if col1.button("+10 MAX HP", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = 1
         sess["anable_confirm"] = True
         write_buff(max_hp+10, max_mana, atk)
-    if col1.button("MAX MANA + 10", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "MANA + 10"
+    if col1.button("+10 MAX MANA", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = 2
         sess["anable_confirm"] = True
         write_buff(max_hp, max_mana+10, atk)
-    if col1.button("ATK + 5", disabled=sess["confirm"], use_container_width=True):
-        sess["choose"] = "ATK + 5"
+    if col1.button("+5 ATK", disabled=sess["confirm"], use_container_width=True):
+        sess["choose"] = 3
         sess["anable_confirm"] = True
         write_buff(max_hp, max_mana, atk+5)
 
@@ -592,11 +629,11 @@ def buff():
         st.rerun()
 
     if sess["confirm"]:
-        if sess["choose"] == "MAX HP + 10":
+        if sess["choose"] == 1:
             player.stats.max_health.increase(10)
-        elif sess["choose"] == "MANA + 10":
+        elif sess["choose"] == 2:
             player.stats.max_mana.increase(10)
-        elif sess["choose"] == "ATK + 5":
+        elif sess["choose"] == 3:
             player.stats.damage.increase(5)
 
         write_buff(max_hp, max_mana, atk)
@@ -611,15 +648,26 @@ def buff():
 
 
 def end():
-    # Set up webpage, load CSS
-    st.set_page_config(layout="centered")  # type: ignore
-    col1, col2, col3 = st.columns(3)
+    if sess["game"] is None:
+        raise RuntimeError("Game object is not initialized.")
+
+    game: Game = sess["game"]
+    player = game.player
+
+    st.set_page_config(layout="centered")
+    load_remove_css()
+
+    _, col2, _ = st.columns(3)
+
     if player.is_alive():
         col2.markdown(
-            "<h1 style='text-align: center; color: blue;'>VICTORY</h1>", unsafe_allow_html=True)
+            "<h1 style='text-align: center; color: blue;'>VICTORY</h1>", unsafe_allow_html=True
+        )
     else:
         col2.markdown(
-            "<h1 style='text-align: center; color: blue;'>LOSE</h1>", unsafe_allow_html=True)
+            "<h1 style='text-align: center; color: blue;'>LOSE</h1>", unsafe_allow_html=True
+        )
+
     if col2.button("HOME PAGE", use_container_width=True):
         st.session_state.clear()
         change_page("main_page")

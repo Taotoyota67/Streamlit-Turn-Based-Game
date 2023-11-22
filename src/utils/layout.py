@@ -1,10 +1,15 @@
-from types import ModuleType
+import streamlit as st
 
 
-def setup_page(st: ModuleType):
-    st.set_page_config(layout="wide")
+def _load_css(path: str) -> None:
+    with open(path) as f:
+        css = f"<style>{f.read()}</style>"
+    st.markdown(css, unsafe_allow_html=True)
 
-    # Disable weird shits using css
-    with open('utils/style.css') as f:
-        hide_img_fs = f"<style>{f.read()}</style>"
-    st.markdown(hide_img_fs, unsafe_allow_html=True)
+
+def load_game_css() -> None:
+    _load_css("utils/style.css")
+
+
+def load_remove_css() -> None:
+    _load_css("utils/remove.css")
