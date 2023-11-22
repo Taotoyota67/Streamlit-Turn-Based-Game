@@ -1,5 +1,5 @@
 /* set shit to center */
-div[data-testid="column"] {
+div[data-testid="column"]:nth-child(2) {
     text-align: center;
     height: 90vh;
     border-radius: 16px;

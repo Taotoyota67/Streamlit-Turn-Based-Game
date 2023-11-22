@@ -303,6 +303,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
     load_game_css()
 
     room = sess.gset("room", 1)
+    room_track = sess.gset("room_track", 0)
 
     all_mon_list = sess.gset("all_mon_list", game.monsters.get_all_names())
     boss_list = ["The Gatekeeper", "The Soul Collector", "The Corrupted",
@@ -334,28 +335,32 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
         floor = 1
     elif 5 <= room <= 8:
         floor = 2
-        monster.stats.max_health.set(
-            int(1.5 * monster.stats.get("max_health"))
-        )
-        monster.stats.health.set(
-            int(1.5 * monster.stats.get("health"))
-        )
-        monster.stats.damage.set(
-            int(1.5 * monster.stats.get("damage"))
-        )
+        if room_track != sess["room"]:
+            monster.stats.max_health.set(
+                int(1.5 * monster.stats.get("max_health"))
+            )
+            monster.stats.health.set(
+                int(1.5 * monster.stats.get("health"))
+            )
+            monster.stats.damage.set(
+                int(1.5 * monster.stats.get("damage"))
+            )
+            sess["room_track"] = room
     else:
         floor = 3
-        monster.stats.max_health.set(
-            int(2.5 * monster.stats.get("max_health"))
-        )
-        monster.stats.health.set(
-            int(2.5 * monster.stats.get("health"))
-        )
-        monster.stats.damage.set(
-            int(2.5 * monster.stats.get("damage"))
-        )
+        if room_track != sess["room"]:
+            monster.stats.max_health.set(
+                int(2.5 * monster.stats.get("max_health"))
+            )
+            monster.stats.health.set(
+                int(2.5 * monster.stats.get("health"))
+            )
+            monster.stats.damage.set(
+                int(2.5 * monster.stats.get("damage"))
+            )
+            sess["room_track"] = room
 
-    col1.title(f":blue[FLOOR {floor} | ROOM {room % 5}]")
+    col1.title(f":blue[FLOOR {floor} | ROOM {room - (floor - 1) * 4}]")
     chart_empty = col1.empty()
 
     def update_player_status_chart():
@@ -374,11 +379,11 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
 
     update_player_status_chart()
 
-    def dissable_button() -> bool:
+    def disable_button() -> bool:
         return not player.is_alive() or player.is_stun() or sess["press_hit_skill"]
 
-    def dissable_skill(move: MoveType) -> bool:
-        return dissable_button() and player.skills.can_use(move)
+    def disable_skill(move: MoveType) -> bool:
+        return disable_button() or not player.skills.can_use(move)
 
     # Still don't pass monster turn
     def skill_click(move_type=None):
@@ -408,17 +413,17 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
         col1.button(
             skill.name.replace("_", " ").replace("DAMAGE BUFF", "DAMAGE x2"),
             key=skill.name,
-            disabled=dissable_skill(skill),
+            disabled=disable_skill(skill),
             on_click=skill_click,
             args=(skill,))
 
     # KILL MONSTER button
-    if st.sidebar.button("KILL MONSTER", disabled=dissable_button(), on_click=skill_click):
+    if st.sidebar.button("KILL MONSTER", disabled=disable_button(), on_click=skill_click):
         player.entity.attack(monster, 1000)
         st.rerun()
 
     # KILL PLAYER button
-    if st.sidebar.button("KILL PLAYER", disabled=dissable_button(), on_click=skill_click):
+    if st.sidebar.button("KILL PLAYER", disabled=disable_button(), on_click=skill_click):
         monster.attack(player.entity, 1000)
         st.rerun()
 
