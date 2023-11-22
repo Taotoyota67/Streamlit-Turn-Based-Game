@@ -328,7 +328,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
 
     col1, col2 = st.columns([2, 4])
 
-    if sess["pass_mon_turn"]:
+    if sess["pass_mon_turn"] and player.is_alive():
         player.tick()
 
     if room <= 4:
@@ -356,7 +356,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
                 int(2.5 * monster.stats.get("health"))
             )
             monster.stats.damage.set(
-                int(2.5 * monster.stats.get("damage"))
+                int(1.5 * monster.stats.get("damage"))
             )
             sess["room_track"] = room
 
@@ -506,7 +506,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
             write_text(mon_text, f"{monster.name} is STUNNED.",
                        monster.text.get("got_attack"), 1, 1.5)
 
-            time.sleep(3)
+            time.sleep(2)
             sess["press_hit_skill"] = False
             sess["pass_mon_turn"] = True
             st.rerun()
@@ -516,29 +516,35 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
             mon_move = monster.random_move()
             mon_move_amount = monster.make_move(mon_move, player.entity)
 
-            move_text = "Something went wrong!"
+            move_text = "..."
             monster_text = monster.text.get(f"do_{mon_move.value}")
 
             # Animate text
             if mon_move == MoveType.ATTACK:
                 move_text = f"{monster.name} ATTACKED you for {mon_move_amount} damage."
+
             elif mon_move == MoveType.DAMAGE_BUFF:
                 move_text = f"{monster.name} ATTCKED using 2x DAMAGE for {mon_move_amount} damage."
+
             elif mon_move == MoveType.HEAL:
                 move_text = f"{monster.name} used HEAL and recovered {mon_move_amount} health."
+
             elif mon_move == MoveType.POISON:
                 move_text = f"{monster.name} used POISON. "
                 move_text += f"YOU are poisoned for {mon_move_amount} turns."
+
             elif mon_move == MoveType.LIFE_STEAL:
                 move_text = f"{monster.name} used LIFE STEAL. It stole {mon_move_amount} health."
+
             elif mon_move == MoveType.STUN:
                 move_text = f"{monster.name} used STUN. YOU will are stunned for 1 turn"
+
             elif mon_move == MoveType.MANA_DRAIN:
                 move_text = f"{monster.name} drained YOUR MANA for {mon_move_amount} mana."
 
             write_text(mon_text, move_text, monster_text, 1, 1.5)
 
-            time.sleep(1.5)
+            time.sleep(1)
             sess["press_hit_skill"] = False
             sess["pass_mon_turn"] = True
             st.rerun()
@@ -550,7 +556,7 @@ def fight():  # pylint: disable=too-many-locals,too-many-branches,too-many-state
             sess["room"] += 1
             # Temp fix, unknown bug caused by very competent frontend
             if monster.name in sess["all_mon_list"]:
-                sess["all_mon_list"].remove(monster.name)
+                st.session_state["all_mon_list"].remove(monster.name)
 
             del st.session_state["monster"]
 
