@@ -429,7 +429,7 @@ PLAYER_MOVE_COSTS = {
     "damage_buff": 6,
     "heal": 8,
     "poison": 5,
-    "life_steal": 6,
+    "life_steal": 8,
     "stun": 6,
 }
 
@@ -439,7 +439,7 @@ MONSTER_MANA_DRAIN_MULTIPLIER = 0.25  # 25% of player max_mana
 
 PLAYER_BUFF_MULTIPLIER = 2  # 2x damage
 PLAYER_BUFF_DURATION = 2  # 2 turns
-PLAYER_HEAL_MULTIPLIER = 0.25  # 25% of max hp
+PLAYER_HEAL_MULTIPLIER = 0.35  # 35% of max hp
 
 POISON_MULTIPLIER = 0.1  # 10% of max hp per turn
 POISON_DURATION = 4  # poison duration (turns)
