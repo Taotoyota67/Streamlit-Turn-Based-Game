@@ -248,25 +248,25 @@ def choosing_status():
 
     # Write status after clicking button
     if sess["choose"] == 1:
-        write_status(100, 100, 5)
-        player.stats.max_health.set(100)
-        player.stats.health.set(100)
-        player.stats.max_mana.set(100)
-        player.stats.mana.set(100)
-        player.stats.damage.set(5)
-    elif sess["choose"] == 2:
-        write_status(150, 50, 7)
-        player.stats.max_health.set(150)
-        player.stats.health.set(150)
-        player.stats.max_mana.set(50)
-        player.stats.mana.set(50)
-        player.stats.damage.set(7)
-    elif sess["choose"] == 3:
-        write_status(50, 150, 7)
+        write_status(50, 30, 5)
         player.stats.max_health.set(50)
         player.stats.health.set(50)
-        player.stats.max_mana.set(150)
-        player.stats.mana.set(150)
+        player.stats.max_mana.set(30)
+        player.stats.mana.set(30)
+        player.stats.damage.set(5)
+    elif sess["choose"] == 2:
+        write_status(70, 15, 8)
+        player.stats.max_health.set(70)
+        player.stats.health.set(70)
+        player.stats.max_mana.set(15)
+        player.stats.mana.set(15)
+        player.stats.damage.set(8)
+    elif sess["choose"] == 3:
+        write_status(30, 60, 7)
+        player.stats.max_health.set(30)
+        player.stats.health.set(30)
+        player.stats.max_mana.set(60)
+        player.stats.mana.set(60)
         player.stats.damage.set(7)
 
     # Write skills after clicking confirm and anable "NEXT" button

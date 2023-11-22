@@ -1,0 +1,32 @@
+button[title="View fullscreen"] {
+    visibility: hidden;
+    /* disable view full screen on image */
+}
+
+.stApp a:first-child {
+    display: none;
+    /* disable title link on markdown */
+}
+
+details {
+    display: none;
+    /* disable save button on graph */
+}
+
+/* set shit to center */
+div[data-testid="column"] {
+    text-align: center;
+}
+
+div[data-testid="column"]:nth-of-type(2) {
+    border: 2px solid red;
+}
+
+/* image goes centerrrr */
+div[data-testid=stImage] {
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
